@@ -990,7 +990,7 @@ dependencies = [
 requires-dist = [
     { name = "opencv-python", specifier = ">=4.13.0.92" },
     { name = "stable-baselines3", extras = ["extra"] },
-    { name = "stable-retro", specifier = ">=0.9.8" },
+    { name = "stable-retro", git = "https://github.com/Farama-Foundation/stable-retro.git?branch=blank_screen_fix" },
 ]
 
 [[package]]
@@ -1056,16 +1056,11 @@ extra = [
 [[package]]
 name = "stable-retro"
 version = "0.9.8"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/Farama-Foundation/stable-retro.git?branch=blank_screen_fix#bc021ab5683f7fb734b4116c14bb924aa14f9540" }
 dependencies = [
     { name = "farama-notifications" },
     { name = "gymnasium" },
     { name = "pyglet" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/35/d733e877dcb5b1d3e75225034617377ed466aab71cd397b3d7514017de05/stable_retro-0.9.8.tar.gz", hash = "sha256:6a1c9e949bd17f97133c06c75d3555fd7793619f575a6df688a81f4ef05aa7f4", size = 153915602, upload-time = "2025-12-28T12:37:25.426Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0a/d0/501a255e10582af502b07fe5a98c592f5cd644c6db8f8b6faf5ecc8e5d67/stable_retro-0.9.8-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:24ad2de4cda828d637c7ce9de8f088437b03f0da60d56c1d0d34a6747b937f6a", size = 89134540, upload-time = "2025-12-28T12:36:49.522Z" },
-    { url = "https://files.pythonhosted.org/packages/35/9d/2c0264f0b5877a519a00eadfe7e14e4d33bfbd9ffccc582c9bb44893973c/stable_retro-0.9.8-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:b1e6ef1532368917bfbebd05d7f68a93dc98300273d9144d4b82ddc5790bdd8e", size = 122580930, upload-time = "2025-12-28T12:36:55.362Z" },
 ]
 
 [[package]]
