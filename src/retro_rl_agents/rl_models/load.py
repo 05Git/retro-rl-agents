@@ -11,7 +11,7 @@ def load_model(
     model_path: Path | None
 ) -> BaseAlgorithm:
     try:
-        mod = import_module(f"retro_rl_agents.models.{model_type}")
+        mod = import_module(f"retro_rl_agents.rl_models.{model_type}")
     except ModuleNotFoundError as e:
         #TODO: logging
         raise e
