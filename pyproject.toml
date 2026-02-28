@@ -1,14 +1,16 @@
 [project]
 name = "retro-rl-agents"
 version = "0.1.0"
-description = "Add your description here"
+description = "Train RL agents with stable-retro (mainly focused on retro fighting games)"
 readme = "README.md"
-requires-python = "~=3.12"
+requires-python = "==3.12.3"
 dependencies = [
     "opencv-python>=4.13.0.92",
-    "stable-baselines3[extra]",
-    "stable-retro>=0.9.8",
+    "pyyaml>=6.0.3",
+    "sphinx>=9.1.0",
+    "stable-baselines3[extra]>=2.7.1",
+    "stable-retro>=0.9.9",
 ]
 
-[tool.uv.sources]
-stable-retro = { git = "https://github.com/Farama-Foundation/stable-retro.git", branch = "blank_screen_fix" }
+[project.scripts]
+agents = "retro_rl_agents.main:main"
