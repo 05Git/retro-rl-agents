@@ -6,7 +6,7 @@ from typing import Any
 
 from retro_rl_agents.cli.arguments import get_args
 from retro_rl_agents.utils.constants import GAME_NAME_MAP
-from retro_rl_agents.models.load import load_model
+from retro_rl_agents.rl_models.load import load_model
 from retro_rl_agents.services.call import call_service
 
 def make_env(env: str) -> retro.RetroEnv:
