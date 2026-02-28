@@ -14,4 +14,3 @@ Train RL agents to  play retro fighting games, starting with SF2 and expanding t
 - Add run summaries
 - Add proper documentation
 - Handle default settings for things like PPO more robustly
-- Add dataclasses
