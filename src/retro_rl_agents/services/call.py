@@ -1,11 +1,12 @@
 from importlib import import_module
-from typing import Any
 from stable_baselines3.common.base_class import BaseAlgorithm
+
+from retro_rl_agents.data_models.config_data import ConfigData
 
 def call_service(
     service_name: str,
     agent: BaseAlgorithm,
-    service_config: dict[str, Any]
+    config: ConfigData
 ) -> None:
     try:
         mod = import_module(f"retro_rl_agents.services.{service_name}")
@@ -23,4 +24,4 @@ def call_service(
         ]
         raise AttributeError(" ".join(err_msg_args))
     
-    mod.service(agent=agent, config=service_config)
+    mod.service(agent=agent, config=config)
