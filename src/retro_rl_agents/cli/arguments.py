@@ -1,6 +1,5 @@
 from argparse import ArgumentParser, Namespace, ArgumentDefaultsHelpFormatter
 
-# from .validate import validate_args
 from retro_rl_agents.utils.constants import VALID_SERVICES
 
 def get_args() -> Namespace:
@@ -34,8 +33,6 @@ def get_args() -> Namespace:
 
     if args.config_path is None:
         args.config_path = f"configs/{args.game}/{args.service}.yml"
-
-    # validate_args(args)
 
     return args
 
