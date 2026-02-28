@@ -3,11 +3,25 @@ from typing import Any
 
 from retro_rl_agents.data_models.config_data import ConfigData
 
-def service(agent: BaseAlgorithm, config: ConfigData) -> None:    
+def service(agent: BaseAlgorithm, config: ConfigData) -> None:
+    """
+    Call an agent's learn method and save the fully trained weights
+    to the path specified by the config data.
+
+    Args:
+        agent (BaseAlgorithm): RL agent to train.
+        config (ConfigData): Config containing training params.
+    """
     train_settings: dict[str, Any] = config.train_settings
-    agent.learn(**train_settings)
+    print("Training...")
+    try:
+        agent.learn(**train_settings)
+    except KeyboardInterrupt:
+        print("Exiting training early.")
 
     config.save_path.mkdir(parents=True, exist_ok=True)
     save_name = str(train_settings["total_timesteps"])
 
-    agent.save(path=config.save_path / save_name)
+    save_path = config.save_path / save_name
+    agent.save(path=save_path)
+    print(f"Model data saved to {save_path}")

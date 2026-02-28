@@ -10,6 +10,22 @@ def load_model(
     settings_config: dict[str, Any],
     model_path: Path | None
 ) -> BaseAlgorithm:
+    """
+    Calls the specified module's 'load_model' method.
+
+    Args:
+        model_type (str): Model module (PPO, FuseNet, etc).
+        env (RetroEnv): RL env to train/eval/etc on.
+        settings_config (dict[str, Any]): Model parameters.
+        model_path (Path | None): Optional path to pre-trained model.
+
+    Raises:
+        ModuleNotFoundError: Invalid module name.
+        AttributeError: Specified module has no 'load_model' method.
+
+    Returns:
+        BaseAlgorithm: RL model created by specified module.
+    """
     try:
         mod = import_module(f"retro_rl_agents.rl_models.{model_type}")
     except ModuleNotFoundError as e:

@@ -9,6 +9,7 @@ def load_model(
     settings_config: dict[str, Any] = {},
     model_path: Path | None = None
 ) -> PPO:
+    """Load an SB3 PPO model"""
     if model_path is not None:
         return PPO.load(
             path=model_path,

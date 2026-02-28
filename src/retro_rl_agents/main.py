@@ -10,12 +10,35 @@ from retro_rl_agents.services.call import call_service
 from retro_rl_agents.data_models.config_data import ConfigData
 
 def make_env(env: str) -> RetroEnv:
+    """
+    Make an RL training Env.
+
+    Args:
+        env (str): Name of game to build env with.
+        Game must be implemented in stable_retro.
+    
+    Returns:
+        RetroEnv: An RL env of the input game.
+    """
     try:
         return make(env)
     except FileNotFoundError:
         return make(GAME_NAME_MAP[env])
     
 def load_config(config_path: Path) -> ConfigData:
+    """
+    Load a YAML config file.
+
+    Args:
+        config_path (Path): Path to config file (must be .yaml or .yml file)
+
+    Raises:
+        FileNotFoundError: on config_path.is_file() returns False
+        ValueError: on config_path.suffix not ".yaml" or ".yml"
+
+    Returns:
+        ConfigData: Config data model
+    """
     if not config_path.is_file():
         raise FileNotFoundError(f"Config not found at {config_path}")
     
@@ -31,6 +54,7 @@ def load_config(config_path: Path) -> ConfigData:
     return ConfigData(config_path=config_path, **data)
 
 def main():
+    """Entry point for calling services like 'train' or 'eval'"""
     args = get_args()
 
     game_name = args.game

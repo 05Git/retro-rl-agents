@@ -6,7 +6,17 @@ from typing import Any
 @dataclass
 class ConfigData:
     """
-    Docstring
+    Data model for YAML configs.
+
+    Attributes:
+        config_path (Path): Path to actual yaml config.
+        model_type (str): The type of RL model used.
+        model_path (Path | None): Optional path to pre-trained model.
+        working_dir (Path): Path to directory where script is running from.
+        save_dir (str): Optional directory name for saving RL models to.
+        run_id (str): Optional ID for a specific run.
+        model_settings (dict[str, Any]): RL model parameters.
+        train_settings (dict[str, Any]): Training parameters.
     """
 
     config_path: Path
@@ -17,7 +27,6 @@ class ConfigData:
     save_dir: str = "trained_agents"
     run_id: str = datetime.now().isoformat(timespec="seconds")
 
-    # TODO: Model more thoroughly
     model_settings: dict[str, Any] = field(default_factory=dict)
     train_settings: dict[str, Any] = field(default_factory=dict)
 

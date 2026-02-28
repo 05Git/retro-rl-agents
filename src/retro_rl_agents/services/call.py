@@ -8,6 +8,21 @@ def call_service(
     agent: BaseAlgorithm,
     config: ConfigData
 ) -> None:
+    """
+    Calls a service module's 'service' function.
+    These are intended to perform specific functions for RL agents,
+    e.g. the 'train' service runs an agent's learn method and
+    saves it to the specified directory.
+
+    Args:
+        service_name (str): Service module to be imported.
+        agent (BaseAlgorithm): RL agent loaded by rl_models.load_agent
+        config (ConfigData): Config data model.
+
+    Raises:
+        ModuleNotFoundError: Invalid service module name.
+        AttributeError: Service module has no 'service' method.
+    """
     try:
         mod = import_module(f"retro_rl_agents.services.{service_name}")
     except ModuleNotFoundError as e:
