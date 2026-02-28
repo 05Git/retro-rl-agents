@@ -5,7 +5,7 @@ from retro_rl_agents.utils.constants import VALID_SERVICES
 
 def get_args() -> Namespace:
     parser = ArgumentParser(
-        prog="retro-agents",
+        prog="retro-rl-agents",
         description="Train RL agents to play retro games.",
         formatter_class=ArgumentDefaultsHelpFormatter
     )
@@ -31,6 +31,10 @@ def get_args() -> Namespace:
     )
 
     args = parser.parse_args()
+
+    if args.config_path is None:
+        args.config_path = f"configs/{args.game}/{args.service}.yml"
+
     # validate_args(args)
 
     return args

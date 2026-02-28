@@ -9,6 +9,32 @@ from retro_rl_agents.rl_models.load import load_model
 from retro_rl_agents.services.call import call_service
 from retro_rl_agents.data_models.config_data import ConfigData
 
+
+def main():
+    """Entry point for calling services like 'train' or 'eval'"""
+    args = get_args()
+
+    env = make_env(args.game)
+    
+    config_path = Path.cwd().resolve() / args.config_path
+    config = load_config(config_path=config_path)
+
+    agent = load_model(
+        model_type=config.model_type,
+        env=env,
+        settings_config=config.model_settings,
+        model_path=config.model_path
+    )
+
+    call_service(
+        service_name=args.service,
+        agent=agent,
+        config=config
+    )
+
+    env.close()
+
+
 def make_env(env: str) -> RetroEnv:
     """
     Make an RL training Env.
@@ -25,6 +51,7 @@ def make_env(env: str) -> RetroEnv:
     except FileNotFoundError:
         return make(GAME_NAME_MAP[env])
     
+
 def load_config(config_path: Path) -> ConfigData:
     """
     Load a YAML config file.
@@ -53,36 +80,6 @@ def load_config(config_path: Path) -> ConfigData:
     
     return ConfigData(config_path=config_path, **data)
 
-def main():
-    """Entry point for calling services like 'train' or 'eval'"""
-    args = get_args()
-
-    game_name = args.game
-    env = make_env(game_name)
-    
-    service_type = args.service
-    config_path = args.config_path
-
-    if config_path is None:
-        config_path = f"configs/{game_name}/{service_type}.yml"
-
-    resolved_config_path = Path.cwd().resolve() / config_path
-    config = load_config(config_path=resolved_config_path)
-    
-    agent = load_model(
-        model_type=config.model_type,
-        env=env,
-        settings_config=config.model_settings,
-        model_path=config.model_path
-    )
-
-    call_service(
-        service_name=service_type,
-        agent=agent,
-        config=config
-    )
-
-    env.close()
 
 if __name__ == "__main__":
     main()
