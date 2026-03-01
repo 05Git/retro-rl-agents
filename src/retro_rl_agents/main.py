@@ -43,11 +43,18 @@ def main():
         args.config_path
     )
 
+    try:
+        env = make_env(args.game)
+    except FileNotFoundError as e:
+        logger.error(e)
+        raise e
+
     config_path = Path.cwd().resolve() / args.config_path
     try:
-        config = load_config(config_path=config_path)
+        config = load_config(config_path=config_path, env=env)
     except Exception as e:
         logger.error(e)
+        env.close()
         raise e
     
     using_cuda: bool = (
@@ -58,33 +65,24 @@ def main():
     set_random_seed(config.seed, using_cuda=using_cuda)
 
     try:
-        env = make_env(args.game)
-    except FileNotFoundError as e:
-        logger.error(e)
-        raise e
-
-    try:
         agent = load_model(
             model_type=config.model_type,
             env=env,
             settings_config=config.model_settings,
             model_path=config.model_path
         )
-    except AttributeError as e:
-        logger.error(e)
-        raise
-
-    try:
         call_service(
             service_name=args.service,
             agent=agent,
             config=config
         )
+
     except AttributeError as e:
         logger.error(e)
         raise
-
-    env.close()
+    
+    finally:
+        env.close()
 
 
 def make_env(env: str) -> RetroEnv:
@@ -104,7 +102,7 @@ def make_env(env: str) -> RetroEnv:
         return make(GAME_NAME_MAP[env])
     
 
-def load_config(config_path: Path) -> ConfigData:
+def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
     """
     Load a YAML config file.
 
@@ -145,7 +143,7 @@ def load_config(config_path: Path) -> ConfigData:
         else:
             data["service_settings"] = individual_service_settings
 
-        return ConfigData(config_path=config_path, **data)
+        return ConfigData(config_path=config_path, env=env, **data)
     
     except TypeError:
         logger.error(

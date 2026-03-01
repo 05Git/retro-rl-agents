@@ -2,6 +2,7 @@ from dataclasses import dataclass, field, fields
 from pathlib import Path
 from datetime import datetime
 from typing import Any
+from stable_retro import RetroEnv
 
 @dataclass
 class ConfigData:
@@ -20,6 +21,7 @@ class ConfigData:
     """
 
     config_path: Path
+    env: RetroEnv
     model_type: str
     model_path: Path | None = None
     
@@ -29,6 +31,8 @@ class ConfigData:
 
     model_settings: dict[str, Any] = field(default_factory=dict)
     service_settings: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+    deterministic: bool = True
 
     def __post_init__(self):
         """
