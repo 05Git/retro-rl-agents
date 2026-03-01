@@ -26,17 +26,16 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         logger.info("Keyboard interrupt detected, exiting training early.")
 
     config.save_path.mkdir(parents=True, exist_ok=True)
-    save_name = str(train_settings["total_timesteps"])
 
     if config.model_path is not None:
+        old_name = config.model_path.with_suffix("").name
         try:
-            save_name = str(
-                train_settings["total_timesteps"]
-                + int(config.model_path.with_suffix("").name)
-            )
+            save_name = str(train_settings["total_timesteps"] + int(old_name))
         except ValueError:
-            save_name = save_name + config.generate_timestamp()
-
+            save_name = old_name + config.generate_timestamp()
+    else:
+        save_name = str(train_settings["total_timesteps"])
+        
     save_path = config.save_path / save_name
     try:
         agent.save(path=save_path)
