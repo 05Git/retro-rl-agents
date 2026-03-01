@@ -7,9 +7,11 @@ requires-python = "==3.12.3"
 dependencies = [
     "opencv-python>=4.13.0.92",
     "pyyaml>=6.0.3",
+    "setuptools==81.0.0",
     "sphinx>=9.1.0",
     "stable-baselines3[extra]>=2.7.1",
     "stable-retro>=0.9.9",
+    "tensorboard>=2.20.0",
 ]
 
 [project.scripts]
