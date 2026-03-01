@@ -17,7 +17,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
 
     Args:
         agent (BaseAlgorithm): RL agent to train.
-        config (ConfigData): Config containing training params.
+        config (ConfigData): Config containing evaluation params.
     """
     if config.model_path is None:
         raise ValueError(
@@ -31,7 +31,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         eval_env = (
             agent.env
             if agent.env is not None
-            else eval_settings.pop("env")
+            else config.env
         )
         results = evaluate_policy(
             model=agent,
