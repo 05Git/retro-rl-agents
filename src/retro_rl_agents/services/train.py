@@ -20,6 +20,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     train_settings: dict[str, Any] = config.get_service_settings(NAME)
     logger.info("Training...")
     try:
+        # TODO: Add way to handle callbacks
         agent.learn(**train_settings)
     except KeyboardInterrupt:
         logger.info("Exiting training early.")
