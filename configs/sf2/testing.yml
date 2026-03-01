@@ -1,15 +1,34 @@
 model_type: ppo
-model_path: null
-save_dir: models
-run_id: testing
+model_path: trained_agents/ppo/2026-03-01T10:44:03/2000000.zip
 model_settings:
   policy: CnnPolicy
-  learning_rate: 1.e-4
+  learning_rate:
+    - 2.e-5
+    - 2.5e-6
+  n_steps: 2048
+  batch_size: 64
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range:
+    - 0.15
+    - 0.025
+  clip_range_vf:
+    - 0.15
+    - 0.025
+  ent_coef: 0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
   tensorboard_log: tensorboards/sf2
   verbose: 1
+  stats_window_size: 100
   seed: 0
 service_settings:
   train:
-    total_timesteps: 2_000
+    total_timesteps: 2_000_000
     tb_log_name: PPO
     progress_bar: true
+  eval:
+    n_eval_episodes: 3
+    render: true
+    return_episode_rewards: true

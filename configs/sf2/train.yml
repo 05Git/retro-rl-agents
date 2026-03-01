@@ -1,5 +1,4 @@
 model_type: ppo
-model_path: null
 model_settings:
   policy: CnnPolicy
   learning_rate:
@@ -23,8 +22,7 @@ model_settings:
   verbose: 1
   stats_window_size: 100
   seed: 0
-service_settings:
-  train:
-    total_timesteps: 2_000_000
-    tb_log_name: PPO
-    progress_bar: true
+train_settings:
+  total_timesteps: 2_000_000
+  tb_log_name: PPO
+  progress_bar: true
