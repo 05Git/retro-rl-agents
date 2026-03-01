@@ -1,5 +1,6 @@
 import torch as th
 from pathlib import Path
+from datetime import datetime
 
 import retro_rl_agents.rl_models as rl_models
 import retro_rl_agents.services as services
@@ -25,4 +26,8 @@ VALID_MODELS: list[str] = [
     and model_type.endswith(".py")
 ]
 
-LOG_DIR = Path.cwd().resolve() / ".logs"
+LOG_DIR = (
+    Path.cwd().resolve()
+    / ".logs"
+    / datetime.now().strftime("%Y-%m-%d")
+)
