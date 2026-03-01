@@ -59,8 +59,8 @@ def main():
     
     using_cuda: bool = (
         "cuda" in DEVICE
-    ) if isinstance(DEVICE, str) else (
-        "cuda" in DEVICE.type
+        if isinstance(DEVICE, str)
+        else "cuda" in DEVICE.type
     )
     set_random_seed(config.seed, using_cuda=using_cuda)
 
@@ -80,7 +80,7 @@ def main():
     except AttributeError as e:
         logger.error(e)
         raise
-    
+
     finally:
         env.close()
 
