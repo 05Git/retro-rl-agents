@@ -28,6 +28,15 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     config.save_path.mkdir(parents=True, exist_ok=True)
     save_name = str(train_settings["total_timesteps"])
 
+    if config.model_path is not None:
+        try:
+            save_name = str(
+                train_settings["total_timesteps"]
+                + int(config.model_path.with_suffix("").name)
+            )
+        except ValueError:
+            save_name = save_name + config.generate_timestamp()
+
     save_path = config.save_path / save_name
     try:
         agent.save(path=save_path)
