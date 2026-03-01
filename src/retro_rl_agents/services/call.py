@@ -39,7 +39,7 @@ def call_service(
             f"Module {mod.__name__} does not contain a 'service' method.",
             "All service modules must contain a 'service' method which takes",
             "an agent and a config as arguments. Please ensure this method is",
-            "implemented before callingn this service again."
+            "implemented before calling this service again."
         ]
         raise AttributeError(" ".join(err_msg_args))
     

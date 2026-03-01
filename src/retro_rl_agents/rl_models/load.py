@@ -42,7 +42,7 @@ def load_model(
             "Every RL model module must implement a 'load_model' method which",
             "takes a RetroEnv and (optionally) a settings config and",
             "path to a pre-trained model as args. Please ensure this",
-            "method is implemented before retrying loading this type of model."
+            "method is implemented before trying to load this type of model."
         ]
         raise AttributeError(" ".join(err_msg_args))
 
