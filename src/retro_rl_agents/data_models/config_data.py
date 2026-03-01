@@ -61,3 +61,7 @@ class ConfigData:
         if settings is None:
             raise KeyError(f"Service '{service_name}' settings not found.")
         return settings
+    
+    @classmethod
+    def generate_timestamp(cls, timespec: str = "seconds") -> str:
+        return datetime.now().isoformat(timespec=timespec)

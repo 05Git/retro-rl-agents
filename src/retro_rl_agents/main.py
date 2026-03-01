@@ -1,7 +1,6 @@
 import sys
 import yaml
 import logging
-import torch as th
 
 from pathlib import Path
 from datetime import datetime
