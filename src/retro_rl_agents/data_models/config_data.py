@@ -28,7 +28,7 @@ class ConfigData:
     run_id: str = datetime.now().isoformat(timespec="seconds")
 
     model_settings: dict[str, Any] = field(default_factory=dict)
-    train_settings: dict[str, Any] = field(default_factory=dict)
+    service_settings: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def __post_init__(self):
         """
@@ -52,3 +52,8 @@ class ConfigData:
     def save_path(self):
         return self.working_dir / self.save_dir / self.model_type / self.run_id
     
+    def get_service_settings(self, service_name: str) -> dict[str, Any]:
+        settings = self.service_settings.get(service_name)
+        if settings is None:
+            raise KeyError(f"Service '{service_name}' settings not found.")
+        return settings

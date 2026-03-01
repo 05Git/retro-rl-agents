@@ -4,10 +4,15 @@ import logging
 
 from pathlib import Path
 from datetime import datetime
+from typing import Any
 from stable_retro import RetroEnv, make
 
 from retro_rl_agents.cli.arguments import get_args
-from retro_rl_agents.utils.constants import GAME_NAME_MAP, LOG_DIR
+from retro_rl_agents.utils.constants import (
+    GAME_NAME_MAP,
+    LOG_DIR,
+    VALID_SERVICES
+)
 from retro_rl_agents.rl_models.load import load_model
 from retro_rl_agents.services.call import call_service
 from retro_rl_agents.data_models.config_data import ConfigData
@@ -115,18 +120,31 @@ def load_config(config_path: Path) -> ConfigData:
     
     try:
         with open(config_path) as f:
-            data = yaml.safe_load(f)
+            data: dict[str, Any] = yaml.safe_load(f)
     except Exception:
         raise
     
     try:
+        individual_service_settings: dict[str, dict[str, Any]] = {
+            k: data.pop(f"{k}_settings")
+            for k in VALID_SERVICES
+            if f"{k}_settings" in data.keys()
+        }
+
+        if "service_settings" in data.keys():
+            data["service_settings"].update(individual_service_settings)
+        else:
+            data["service_settings"] = individual_service_settings
+
         return ConfigData(config_path=config_path, **data)
+    
     except TypeError:
         logger.error(
             "Config data contained invalid field(s) and/or value(s): %s",
             str(list(data.items()))
         )
         raise
+
     except Exception:
         raise
 

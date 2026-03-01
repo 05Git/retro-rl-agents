@@ -5,7 +5,8 @@ from typing import Any
 
 from retro_rl_agents.data_models.config_data import ConfigData
 
-logger = logging.getLogger(__name__)
+NAME = __name__.split(".")[-1]
+logger = logging.getLogger(NAME)
 
 def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     """
@@ -16,7 +17,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         agent (BaseAlgorithm): RL agent to train.
         config (ConfigData): Config containing training params.
     """
-    train_settings: dict[str, Any] = config.train_settings
+    train_settings: dict[str, Any] = config.get_service_settings(NAME)
     logger.info("Training...")
     try:
         agent.learn(**train_settings)

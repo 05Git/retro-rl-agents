@@ -8,7 +8,8 @@ model_settings:
   tensorboard_log: tensorboards/sf2
   verbose: 1
   seed: 0
-train_settings:
-  total_timesteps: 2_000
-  tb_log_name: PPO
-  progress_bar: true
+service_settings:
+  train:
+    total_timesteps: 2_000
+    tb_log_name: PPO
+    progress_bar: true
