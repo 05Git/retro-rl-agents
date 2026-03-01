@@ -1,7 +1,11 @@
+import logging
+
 from importlib import import_module
 from stable_baselines3.common.base_class import BaseAlgorithm
 
 from retro_rl_agents.data_models.config_data import ConfigData
+
+logger = logging.getLogger(__name__)
 
 def call_service(
     service_name: str,
@@ -26,7 +30,7 @@ def call_service(
     try:
         mod = import_module(f"retro_rl_agents.services.{service_name}")
     except ModuleNotFoundError as e:
-        #TODO: logging
+        logger.error(e)
         raise e
     
     if not hasattr(mod, "service"):

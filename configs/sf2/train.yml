@@ -1,7 +1,7 @@
 model_type: ppo
 model_path: null  # path to pretrained model
-save_dir: model
-run_id: testing
+# save_dir: models
+# run_id: testing
 model_settings:
   policy: CnnPolicy
   learning_rate: 1.e-4

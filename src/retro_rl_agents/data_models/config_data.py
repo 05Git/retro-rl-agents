@@ -35,10 +35,15 @@ class ConfigData:
         Format data after __init__
         - Change paths from Strings to Paths 
         """
+        path_fields = (
+            "config_path",
+            "model_path",
+            "working_dir"
+        )
         for f in fields(self):
             field_value = getattr(self, f.name)
             if (
-                f.name in ("config_path", "model_path", "working_dir")
+                f.name in path_fields
                 and isinstance(field_value, str)
             ):
                 setattr(self, f.name, Path(field_value))

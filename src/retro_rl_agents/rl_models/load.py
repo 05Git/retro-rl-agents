@@ -1,8 +1,12 @@
+import logging
+
 from importlib import import_module
 from typing import Any
 from pathlib import Path
 from stable_retro import RetroEnv
 from stable_baselines3.common.base_class import BaseAlgorithm
+
+logger = logging.getLogger(__name__)
 
 def load_model(
     model_type: str,
@@ -29,7 +33,7 @@ def load_model(
     try:
         mod = import_module(f"retro_rl_agents.rl_models.{model_type}")
     except ModuleNotFoundError as e:
-        #TODO: logging
+        logger.error(e)
         raise e
     
     if not hasattr(mod, "load_model"):
@@ -42,8 +46,15 @@ def load_model(
         ]
         raise AttributeError(" ".join(err_msg_args))
 
-    return mod.load_model(
-        env=env,
-        settings_config=settings_config,
-        model_path=model_path
-    )
+    try:
+        return mod.load_model(
+            env=env,
+            settings_config=settings_config,
+            model_path=model_path
+        )
+    except TypeError:
+        logger.error(
+            "Model params contained invalid field(s) and/or value(s): %s",
+            str(list(settings_config.items()))
+        )
+        raise

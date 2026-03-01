@@ -9,4 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
+# Pretrained model data
 *.zip
+
+# Logging
+.logs/

@@ -1,4 +1,5 @@
 import torch as th
+from pathlib import Path
 
 DEVICE = th.device("cuda" if th.cuda.is_available() else "cpu")
 GAME_NAME_MAP: dict[str, str] = {
@@ -7,3 +8,4 @@ GAME_NAME_MAP: dict[str, str] = {
 VALID_SERVICES: list[str] = [
     "train"
 ]
+LOG_DIR = Path.cwd().resolve() / ".logs"

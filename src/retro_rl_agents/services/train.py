@@ -1,7 +1,11 @@
+import logging
+
 from stable_baselines3.common.base_class import BaseAlgorithm
 from typing import Any
 
 from retro_rl_agents.data_models.config_data import ConfigData
+
+logger = logging.getLogger(__name__)
 
 def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     """
@@ -13,15 +17,20 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         config (ConfigData): Config containing training params.
     """
     train_settings: dict[str, Any] = config.train_settings
-    print("Training...")
+    logger.info("Training...")
     try:
         agent.learn(**train_settings)
     except KeyboardInterrupt:
-        print("Exiting training early.")
+        logger.info("Exiting training early.")
 
     config.save_path.mkdir(parents=True, exist_ok=True)
     save_name = str(train_settings["total_timesteps"])
 
     save_path = config.save_path / save_name
-    agent.save(path=save_path)
-    print(f"Model data saved to {save_path}")
+    try:
+        agent.save(path=save_path)
+    except Exception as e:
+        logger.error(e)
+        raise
+
+    logger.info(f"Model data saved to {save_path}.zip")
