@@ -52,6 +52,10 @@ class ConfigData:
     def save_path(self):
         return self.working_dir / self.save_dir / self.model_type / self.run_id
     
+    @property
+    def seed(self) -> int:
+        return self.model_settings.get("seed", 0)
+
     def get_service_settings(self, service_name: str) -> dict[str, Any]:
         settings = self.service_settings.get(service_name)
         if settings is None:

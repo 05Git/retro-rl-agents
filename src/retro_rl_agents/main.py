@@ -1,17 +1,20 @@
 import sys
 import yaml
 import logging
+import torch as th
 
 from pathlib import Path
 from datetime import datetime
 from typing import Any
 from stable_retro import RetroEnv, make
+from stable_baselines3.common.utils import set_random_seed
 
 from retro_rl_agents.cli.arguments import get_args
 from retro_rl_agents.utils.constants import (
     GAME_NAME_MAP,
     LOG_DIR,
-    VALID_SERVICES
+    VALID_SERVICES,
+    DEVICE
 )
 from retro_rl_agents.rl_models.load import load_model
 from retro_rl_agents.services.call import call_service
@@ -47,6 +50,13 @@ def main():
     except Exception as e:
         logger.error(e)
         raise e
+    
+    using_cuda: bool = (
+        "cuda" in DEVICE
+    ) if isinstance(DEVICE, str) else (
+        "cuda" in DEVICE.type
+    )
+    set_random_seed(config.seed, using_cuda=using_cuda)
 
     try:
         env = make_env(args.game)

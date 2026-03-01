@@ -23,7 +23,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         # TODO: Add way to handle callbacks
         agent.learn(**train_settings)
     except KeyboardInterrupt:
-        logger.info("Exiting training early.")
+        logger.info("Keyboard interrupt detected, exiting training early.")
 
     config.save_path.mkdir(parents=True, exist_ok=True)
     save_name = str(train_settings["total_timesteps"])
