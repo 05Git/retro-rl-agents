@@ -7,6 +7,7 @@ from retro_rl_agents.data_models.config_data import ConfigData
 NAME = __name__.split(".")[-1]
 logger = logging.getLogger(NAME)
 
+
 def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     """
     Observe an agent's behaviour by watching it play the dang game.
@@ -15,7 +16,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         agent (BaseAlgorithm): RL agent to train.
         config (ConfigData): Config containing service params.
     """
-    env = config.env    
+    env = config.env
     obs, _ = env.reset()
     while True:
         action = agent.predict(obs, deterministic=config.deterministic)

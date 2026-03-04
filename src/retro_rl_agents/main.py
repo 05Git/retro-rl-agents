@@ -1,23 +1,23 @@
-import sys
-import yaml
 import logging
-
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any
-from stable_retro import RetroEnv, make
+
+import yaml
 from stable_baselines3.common.utils import set_random_seed
+from stable_retro import RetroEnv, make
 
 from retro_rl_agents.cli.arguments import get_args
+from retro_rl_agents.data_models.config_data import ConfigData
+from retro_rl_agents.rl_models.load import load_model
+from retro_rl_agents.services.call import call_service
 from retro_rl_agents.utils.constants import (
+    DEVICE,
     GAME_NAME_MAP,
     LOG_DIR,
     VALID_SERVICES,
-    DEVICE
 )
-from retro_rl_agents.rl_models.load import load_model
-from retro_rl_agents.services.call import call_service
-from retro_rl_agents.data_models.config_data import ConfigData
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +29,10 @@ logging.basicConfig(
     level=logging.DEBUG,
     handlers=[
         logging.StreamHandler(stream=sys.stdout),
-        logging.FileHandler(filename=logfile)
-    ]
+        logging.FileHandler(filename=logfile),
+    ],
 )
+
 
 def main():
     """Entry point for calling services like 'train' or 'eval'"""
@@ -40,7 +41,7 @@ def main():
         "Service: '%s', Game: '%s', Config Path: '%s'",
         args.service,
         args.game,
-        args.config_path
+        args.config_path,
     )
 
     try:
@@ -56,11 +57,9 @@ def main():
         logger.error(e)
         env.close()
         raise e
-    
+
     using_cuda: bool = (
-        "cuda" in DEVICE
-        if isinstance(DEVICE, str)
-        else "cuda" in DEVICE.type
+        "cuda" in DEVICE if isinstance(DEVICE, str) else "cuda" in DEVICE.type
     )
     set_random_seed(config.seed, using_cuda=using_cuda)
 
@@ -69,13 +68,9 @@ def main():
             model_type=config.model_type,
             env=env,
             settings_config=config.model_settings,
-            model_path=config.model_path
+            model_path=config.model_path,
         )
-        call_service(
-            service_name=args.service,
-            agent=agent,
-            config=config
-        )
+        call_service(service_name=args.service, agent=agent, config=config)
 
     except AttributeError as e:
         logger.error(e)
@@ -92,7 +87,7 @@ def make_env(env: str) -> RetroEnv:
     Args:
         env (str): Name of game to build env with.
         Game must be implemented in stable_retro.
-    
+
     Returns:
         RetroEnv: An RL env of the input game.
     """
@@ -100,7 +95,7 @@ def make_env(env: str) -> RetroEnv:
         return make(env)
     except FileNotFoundError:
         return make(GAME_NAME_MAP[env])
-    
+
 
 def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
     """
@@ -118,19 +113,19 @@ def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
     """
     if not config_path.is_file():
         raise FileNotFoundError(f"Config not found at {config_path}")
-    
+
     if config_path.suffix not in (".yaml", ".yml"):
         raise ValueError(
             "Expected config suffix to be '.yaml' or '.yml', "
             f"received {config_path.suffix})"
         )
-    
+
     try:
         with open(config_path) as f:
             data: dict[str, Any] = yaml.safe_load(f)
     except Exception:
         raise
-    
+
     try:
         individual_service_settings: dict[str, dict[str, Any]] = {
             k: data.pop(f"{k}_settings")
@@ -144,11 +139,11 @@ def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
             data["service_settings"] = individual_service_settings
 
         return ConfigData(config_path=config_path, env=env, **data)
-    
+
     except TypeError:
         logger.error(
             "Config data contained invalid field(s) and/or value(s): %s",
-            str(list(data.items()))
+            str(list(data.items())),
         )
         raise
 

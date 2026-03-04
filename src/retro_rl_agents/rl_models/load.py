@@ -1,18 +1,19 @@
 import logging
-
 from importlib import import_module
-from typing import Any
 from pathlib import Path
-from stable_retro import RetroEnv
+from typing import Any
+
 from stable_baselines3.common.base_class import BaseAlgorithm
+from stable_retro import RetroEnv
 
 logger = logging.getLogger(__name__)
+
 
 def load_model(
     model_type: str,
     env: RetroEnv,
     settings_config: dict[str, Any],
-    model_path: Path | None
+    model_path: Path | None,
 ) -> BaseAlgorithm:
     """
     Calls the specified module's 'load_model' method.
@@ -35,14 +36,14 @@ def load_model(
     except ModuleNotFoundError as e:
         logger.error(e)
         raise e
-    
+
     if not hasattr(mod, "load_model"):
         err_msg_args = [
             f"Module {mod.__name__} does not contain a 'load_model' method.",
             "Every RL model module must implement a 'load_model' method which",
             "takes a RetroEnv and (optionally) a settings config and",
             "path to a pre-trained model as args. Please ensure this",
-            "method is implemented before trying to load this type of model."
+            "method is implemented before trying to load this type of model.",
         ]
         raise AttributeError(" ".join(err_msg_args))
 
@@ -50,11 +51,11 @@ def load_model(
         return mod.load_model(
             env=env,
             settings_config=settings_config,
-            model_path=model_path
+            model_path=model_path,
         )
     except TypeError:
         logger.error(
             "Model params contained invalid field(s) and/or value(s): %s",
-            str(list(settings_config.items()))
+            str(list(settings_config.items())),
         )
         raise

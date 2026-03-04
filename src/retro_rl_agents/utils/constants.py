@@ -1,6 +1,7 @@
-import torch as th
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import torch as th
 
 import retro_rl_agents.rl_models as rl_models
 import retro_rl_agents.services as services
@@ -14,20 +15,14 @@ serv_mods = next(Path(services.__path__[0]).walk(), (None, None, []))[2]
 VALID_SERVICES: list[str] = [
     service_type.replace(".py", "")
     for service_type in serv_mods
-    if service_type != "call.py"
-    and service_type.endswith(".py")
+    if service_type != "call.py" and service_type.endswith(".py")
 ]
 
 rlm_mods = next(Path(rl_models.__path__[0]).walk(), (None, None, []))[2]
 VALID_MODELS: list[str] = [
     model_type.replace(".py", "")
     for model_type in rlm_mods
-    if model_type != "load.py"
-    and model_type.endswith(".py")
+    if model_type != "load.py" and model_type.endswith(".py")
 ]
 
-LOG_DIR = (
-    Path.cwd().resolve()
-    / ".logs"
-    / datetime.now().strftime("%Y-%m-%d")
-)
+LOG_DIR = Path.cwd().resolve() / ".logs" / datetime.now().strftime("%Y-%m-%d")

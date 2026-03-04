@@ -1,12 +1,13 @@
 import logging
+from typing import Any
 
 from stable_baselines3.common.base_class import BaseAlgorithm
-from typing import Any
 
 from retro_rl_agents.data_models.config_data import ConfigData
 
 NAME = __name__.split(".")[-1]
 logger = logging.getLogger(NAME)
+
 
 def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     """
@@ -35,7 +36,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
             save_name = old_name + config.generate_timestamp()
     else:
         save_name = str(train_settings["total_timesteps"])
-        
+
     save_path = config.save_path / save_name
     try:
         agent.save(path=save_path)

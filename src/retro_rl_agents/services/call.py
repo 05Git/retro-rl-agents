@@ -1,16 +1,15 @@
 import logging
-
 from importlib import import_module
+
 from stable_baselines3.common.base_class import BaseAlgorithm
 
 from retro_rl_agents.data_models.config_data import ConfigData
 
 logger = logging.getLogger(__name__)
 
+
 def call_service(
-    service_name: str,
-    agent: BaseAlgorithm,
-    config: ConfigData
+    service_name: str, agent: BaseAlgorithm, config: ConfigData
 ) -> None:
     """
     Calls a service module's 'service' function.
@@ -32,15 +31,15 @@ def call_service(
     except ModuleNotFoundError as e:
         logger.error(e)
         raise e
-    
+
     if not hasattr(mod, "service"):
         # TODO: Abstract err msg args
         err_msg_args = [
             f"Module {mod.__name__} does not contain a 'service' method.",
             "All service modules must contain a 'service' method which takes",
             "an agent and a config as arguments. Please ensure this method is",
-            "implemented before calling this service again."
+            "implemented before calling this service again.",
         ]
         raise AttributeError(" ".join(err_msg_args))
-    
+
     mod.service(agent=agent, config=config)

@@ -1,15 +1,16 @@
-import logging
 import json
-import numpy as np
+import logging
+from typing import Any
 
+import numpy as np
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.evaluation import evaluate_policy
-from typing import Any
 
 from retro_rl_agents.data_models.config_data import ConfigData
 
 NAME = __name__.split(".")[-1]
 logger = logging.getLogger(NAME)
+
 
 def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     """
@@ -24,20 +25,12 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
             "Cannot eval an agent without a pre-trained model, "
             "please set 'model_path' variable before calling this service."
         )
-    
+
     eval_settings: dict[str, Any] = config.get_service_settings(NAME)
     logger.info("Evaluating...")
     try:
-        eval_env = (
-            agent.env
-            if agent.env is not None
-            else config.env
-        )
-        results = evaluate_policy(
-            model=agent,
-            env=eval_env,
-            **eval_settings
-        )
+        eval_env = agent.env if agent.env is not None else config.env
+        results = evaluate_policy(model=agent, env=eval_env, **eval_settings)
 
         if eval_settings.get("return_episode_rewards", False):
             per_ep_returns, per_ep_lens = results
@@ -49,7 +42,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
                 "std_return": np.std(per_ep_returns),
                 "per_episode_lengths": per_ep_lens,
                 "average_length": np.mean(per_ep_lens),
-                "std_length": np.std(per_ep_lens)
+                "std_length": np.std(per_ep_lens),
             }
         else:
             avg_return, std_return = results
@@ -57,7 +50,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
             logger.info("Std return: %s", std_return)
             results_: dict[str, Any] = {
                 "average_return": avg_return,
-                "std_return": std_return
+                "std_return": std_return,
             }
 
         results_dict: dict[str, Any] = {
@@ -65,7 +58,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
             "model_path": str(config.model_path),
             "results": results_,
             "model_settings": config.model_settings,
-            "eval_settings": eval_settings
+            "eval_settings": eval_settings,
         }
 
         save_dir = config.model_path.parent / config.generate_timestamp()
@@ -74,9 +67,8 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
 
         with open(save_file, mode="wt") as f:
             json.dump(results_dict, f)
-        
+
         logger.info("Eval results saved to %s", save_file)
-        
+
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected, exiting evaluation early.")
-

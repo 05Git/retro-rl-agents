@@ -1,20 +1,19 @@
-from stable_retro import RetroEnv
+from pathlib import Path
+from typing import Any
+
 from stable_baselines3 import PPO
 from stable_baselines3.common.utils import FloatSchedule, LinearSchedule
-from typing import Any
-from pathlib import Path
+from stable_retro import RetroEnv
+
 from retro_rl_agents.utils.constants import DEVICE
+
 
 def load_model(
     env: RetroEnv,
     settings_config: dict[str, Any] = {},
-    model_path: Path | None = None
+    model_path: Path | None = None,
 ) -> PPO:
-    schedule_fields = (
-        "learning_rate",
-        "clip_range",
-        "clip_range_vf"
-    )
+    schedule_fields = ("learning_rate", "clip_range", "clip_range_vf")
     for field in schedule_fields:
         field_value = settings_config.get(field)
 
@@ -27,9 +26,12 @@ def load_model(
 
                 case 2:
                     settings_config[field] = FloatSchedule(
-                        LinearSchedule(*field_value, end_fraction=1)
+                        LinearSchedule(
+                            *field_value,
+                            end_fraction=1,
+                        )
                     )
-                    
+
                 case _:
                     raise ValueError(
                         f"Expected {field} list to have 2 or 3 elements, "
@@ -42,13 +44,10 @@ def load_model(
             settings_config[field] = FloatSchedule(
                 LinearSchedule(**field_value)
             )
-        
-        elif (
-            isinstance(field_value, (int, float))
-            or field_value is None
-        ):
+
+        elif isinstance(field_value, (int, float)) or field_value is None:
             continue
-        
+
         else:
             raise TypeError(
                 f"Expected {field} to be a list, dict, int or float, "
@@ -61,11 +60,7 @@ def load_model(
             path=model_path,
             env=env,
             device=DEVICE,
-            **settings_config
+            **settings_config,
         )
-    
-    return PPO(
-        env=env,
-        device=DEVICE,
-        **settings_config
-    )
+
+    return PPO(env=env, device=DEVICE, **settings_config)
