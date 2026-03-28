@@ -14,7 +14,6 @@ def load_model(
     model_path: Path | None = None,
 ) -> PPO:
     """Load an SB3 PPO model"""
-
     schedule_fields = ("learning_rate", "clip_range", "clip_range_vf")
     for field in schedule_fields:
         field_value = settings_config.get(field)
