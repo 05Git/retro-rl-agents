@@ -18,15 +18,25 @@ def get_args() -> Namespace:
     )
 
     parser.add_argument(
-        "game", type=str, help="Name of game to train RL agent on."
+        "game",
+        type=str,
+        help="Name of game to train RL agent on."
     )
 
     parser.add_argument(
         "--config-path",
         "-c",
         type=str,
-        help="Path to a yaml config",
+        help="Path to a yaml config.",
         required=False,
+    )
+
+    parser.add_argument(
+        "--n_envs",
+        "-e",
+        type=int,
+        required=False,
+        help="Number of parallel envs to run."
     )
 
     args = parser.parse_args()
@@ -38,4 +48,4 @@ def get_args() -> Namespace:
 
 
 if __name__ == "__main__":
-    get_args()
+    args = get_args()

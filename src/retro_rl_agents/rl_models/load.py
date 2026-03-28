@@ -3,15 +3,16 @@ from importlib import import_module
 from pathlib import Path
 from typing import Any
 
+from gymnasium import Env
 from stable_baselines3.common.base_class import BaseAlgorithm
-from stable_retro import RetroEnv
+from stable_baselines3.common.vec_env import VecEnv
 
 logger = logging.getLogger(__name__)
 
 
 def load_model(
     model_type: str,
-    env: RetroEnv,
+    env: Env | VecEnv,
     settings_config: dict[str, Any],
     model_path: Path | None,
 ) -> BaseAlgorithm:

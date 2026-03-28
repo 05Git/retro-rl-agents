@@ -5,8 +5,19 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from gymnasium.wrappers import (
+    GrayscaleObservation,
+    NormalizeReward,
+    ResizeObservation,
+)
+from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.utils import set_random_seed
-from stable_retro import RetroEnv, make
+from stable_baselines3.common.vec_env import (
+    SubprocVecEnv,
+    VecFrameStack,
+    VecTransposeImage,
+)
+from stable_retro import make
 
 from retro_rl_agents.cli.arguments import get_args
 from retro_rl_agents.data_models.config_data import ConfigData
@@ -44,24 +55,31 @@ def main():
         args.config_path,
     )
 
-    try:
-        env = make_env(args.game)
-    except FileNotFoundError as e:
-        logger.error(e)
-        raise e
-
     config_path = Path.cwd().resolve() / args.config_path
     try:
-        config = load_config(config_path=config_path, env=env)
+        config = load_config(config_path=config_path)
     except Exception as e:
         logger.error(e)
-        env.close()
         raise e
-
+    
     using_cuda: bool = (
         "cuda" in DEVICE if isinstance(DEVICE, str) else "cuda" in DEVICE.type
     )
     set_random_seed(config.seed, using_cuda=using_cuda)
+
+    try:
+        env = make_vec_env(
+            env_id=lambda: make_env(args.game),
+            n_envs=args.n_envs if args.n_envs is not None else 1,
+            seed=config.seed,
+            vec_env_cls=SubprocVecEnv
+        )
+        env = VecFrameStack(env, n_stack=4)
+        env = VecTransposeImage(env)
+    except FileNotFoundError as e:
+        logger.error(e)
+        raise e
+
 
     try:
         config.set_callback()
@@ -85,7 +103,7 @@ def main():
         env.close()
 
 
-def make_env(env: str) -> RetroEnv:
+def make_env(env_id: str) -> ...:
     """
     Make an RL training Env.
 
@@ -97,12 +115,18 @@ def make_env(env: str) -> RetroEnv:
         RetroEnv: An RL env of the input game.
     """
     try:
-        return make(env)
+        env = make(env_id)
     except FileNotFoundError:
-        return make(GAME_NAME_MAP[env])
+        env = make(GAME_NAME_MAP[env_id])
+    
+    env = GrayscaleObservation(env)
+    env = ResizeObservation(env, (84,84))
+    env = NormalizeReward(env)
+
+    return env
 
 
-def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
+def load_config(config_path: Path) -> ConfigData:
     """
     Load a YAML config file.
 
@@ -140,7 +164,7 @@ def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
         else:
             data["service_settings"] = individual_service_settings
 
-        return ConfigData(config_path=config_path, env=env, **data)
+        return ConfigData(config_path=config_path, **data)
 
     except TypeError:
         logger.error(

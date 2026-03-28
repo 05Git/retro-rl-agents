@@ -32,8 +32,6 @@ class ConfigData:
 
     config_path: Path
 
-    env: RetroEnv
-
     model_type: str
     model_path: Path | None = None
 

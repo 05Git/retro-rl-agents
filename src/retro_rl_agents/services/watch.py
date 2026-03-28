@@ -16,11 +16,29 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         agent (BaseAlgorithm): RL agent to train.
         config (ConfigData): Config containing service params.
     """
-    env = config.env
-    obs, _ = env.reset()
+    env = agent.env
+    if env is None:
+        raise ValueError(
+            "Agent must have env assigned before calling"
+            " this service."
+        )
+    
+    obs = env.reset()
+    if isinstance(obs, tuple) and len(obs) == 2:
+        obs, _ = obs
+
     while True:
-        action = agent.predict(obs, deterministic=config.deterministic)
-        obs, rew, term, trunc, info = env.step(action)
+        action, _ = agent.predict(obs, deterministic=config.deterministic)
+        result = env.step(action)
+        
+        if len(result) == 4:
+            obs, rew, term, info = result
+            done = term
+            
+        else:
+            obs, rew, term, trunc, info = result
+            done = term or trunc
+
         env.render()
-        if term or trunc:
+        if done:
             break
