@@ -1,4 +1,7 @@
 model_type: ppo
+# env_settings:
+#   wrappers:
+#     - 
 model_settings:
   policy: CnnPolicy
   learning_rate:
@@ -23,6 +26,11 @@ model_settings:
   stats_window_size: 100
   seed: 0
 train_settings:
-  total_timesteps: 2_000_000
+  total_timesteps: 2_000
   tb_log_name: PPO
   progress_bar: true
+  callback:
+    - type: sb3_checkpoint
+      save_freq: 1_000
+      name_prefix: rl-model
+      verbose: 2

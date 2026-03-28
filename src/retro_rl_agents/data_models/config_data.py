@@ -3,7 +3,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from stable_baselines3.common.callbacks import CallbackList
 from stable_retro import RetroEnv
+
+from retro_rl_agents.callbacks.callback_factory import CallbackFactory
+from retro_rl_agents.callbacks.external_cbs import register_external_callbacks
 
 
 @dataclass
@@ -20,10 +24,16 @@ class ConfigData:
         run_id (str): Optional ID for a specific run.
         model_settings (dict[str, Any]): RL model parameters.
         train_settings (dict[str, Any]): Training parameters.
+
+    NOTE: This is starting to expand beyond its original scope. Consider
+    narrowing down the data and creating a new RunManager class once init
+    dev work finishes.
     """
 
     config_path: Path
+
     env: RetroEnv
+
     model_type: str
     model_path: Path | None = None
 
@@ -33,6 +43,8 @@ class ConfigData:
 
     model_settings: dict[str, Any] = field(default_factory=dict)
     service_settings: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+    cb_factory: CallbackFactory = CallbackFactory()
 
     deterministic: bool = True
 
@@ -58,9 +70,33 @@ class ConfigData:
     def get_service_settings(self, service_name: str) -> dict[str, Any]:
         settings = self.service_settings.get(service_name)
         if settings is None:
-            raise KeyError(f"Service '{service_name}' settings not found.")
+            raise KeyError(f"Service {service_name!r} settings not found.")
         return settings
 
     @classmethod
     def generate_timestamp(cls, timespec: str = "seconds") -> str:
         return datetime.now().isoformat(timespec=timespec)
+
+    def set_callback(self) -> None:
+        for service_name in self.service_settings.keys():
+            cb_list: list[dict[str, Any]] | None = (
+                self.service_settings[service_name].get("callback")
+            )
+
+            if cb_list is None:
+                continue
+
+            cb_names = [cfg["type"] for cfg in cb_list]
+            register_external_callbacks(
+                cb_factory=self.cb_factory,
+                callback_list=cb_names
+            )
+
+            if "sb3_checkpoint" in cb_names:
+                check_idx: int = cb_names.index("sb3_checkpoint")
+                cb_list[check_idx]["save_path"] = self.save_path / "checkpoints"
+
+            self.service_settings[service_name]["callback"] = CallbackList([
+                self.cb_factory.get_callback(cfg)
+                for cfg in cb_list
+            ])

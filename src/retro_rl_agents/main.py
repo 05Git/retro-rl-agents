@@ -64,13 +64,18 @@ def main():
     set_random_seed(config.seed, using_cuda=using_cuda)
 
     try:
+        config.set_callback()
         agent = load_model(
             model_type=config.model_type,
             env=env,
             settings_config=config.model_settings,
             model_path=config.model_path,
         )
-        call_service(service_name=args.service, agent=agent, config=config)
+        call_service(
+            service_name=args.service,
+            agent=agent,
+            config=config
+        )
 
     except AttributeError as e:
         logger.error(e)
@@ -111,9 +116,6 @@ def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
     Returns:
         ConfigData: Config data model
     """
-    if not config_path.is_file():
-        raise FileNotFoundError(f"Config not found at {config_path}")
-
     if config_path.suffix not in (".yaml", ".yml"):
         raise ValueError(
             "Expected config suffix to be '.yaml' or '.yml', "
@@ -123,7 +125,7 @@ def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
     try:
         with open(config_path) as f:
             data: dict[str, Any] = yaml.safe_load(f)
-    except Exception:
+    except FileNotFoundError:
         raise
 
     try:
@@ -145,9 +147,6 @@ def load_config(config_path: Path, env: RetroEnv) -> ConfigData:
             "Config data contained invalid field(s) and/or value(s): %s",
             str(list(data.items())),
         )
-        raise
-
-    except Exception:
         raise
 
 
