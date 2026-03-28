@@ -13,6 +13,8 @@ def load_model(
     settings_config: dict[str, Any] = {},
     model_path: Path | None = None,
 ) -> PPO:
+    """Load an SB3 PPO model"""
+
     schedule_fields = ("learning_rate", "clip_range", "clip_range_vf")
     for field in schedule_fields:
         field_value = settings_config.get(field)
@@ -54,7 +56,6 @@ def load_model(
                 f"received value of type {type(field).__name__}."
             )
 
-    """Load an SB3 PPO model"""
     if model_path is not None:
         return PPO.load(
             path=model_path,

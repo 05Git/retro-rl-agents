@@ -21,7 +21,6 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     train_settings: dict[str, Any] = config.get_service_settings(NAME)
     logger.info("Training...")
     try:
-        # TODO: Add way to handle callbacks
         agent.learn(**train_settings)
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected, exiting training early.")
@@ -29,7 +28,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     config.save_path.mkdir(parents=True, exist_ok=True)
 
     if config.model_path is not None:
-        old_name = config.model_path.with_suffix("").name
+        old_name = config.model_path.stem
         try:
             save_name = str(train_settings["total_timesteps"] + int(old_name))
         except ValueError:
