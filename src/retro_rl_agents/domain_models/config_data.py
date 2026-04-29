@@ -1,10 +1,11 @@
+from copy import deepcopy
 from dataclasses import dataclass, field, fields
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from stable_baselines3.common.callbacks import CallbackList
-from stable_retro import RetroEnv
+from stable_baselines3.common.utils import FloatSchedule, LinearSchedule
 
 from retro_rl_agents.callbacks.callback_factory import CallbackFactory
 from retro_rl_agents.callbacks.external_cbs import register_external_callbacks
@@ -46,7 +47,9 @@ class ConfigData:
 
     deterministic: bool = True
 
-    def __post_init__(self):
+    n_envs: int = 1
+
+    def __post_init__(self) -> None:
         """
         Format data after __init__
         - Change paths from Strings to Paths
@@ -58,7 +61,7 @@ class ConfigData:
                 setattr(self, f.name, Path(field_value))
 
     @property
-    def save_path(self):
+    def save_path(self) -> Path:
         return self.working_dir / self.save_dir / self.model_type / self.run_id
 
     @property
@@ -77,24 +80,42 @@ class ConfigData:
 
     def set_callback(self) -> None:
         for service_name in self.service_settings.keys():
-            cb_list: list[dict[str, Any]] | None = (
-                self.service_settings[service_name].get("callback")
-            )
+            cb_list: list[dict[str, Any]] | None = self.service_settings[
+                service_name
+            ].get("callback")
 
             if cb_list is None:
                 continue
 
             cb_names = [cfg["type"] for cfg in cb_list]
             register_external_callbacks(
-                cb_factory=self.cb_factory,
-                callback_list=cb_names
+                cb_factory=self.cb_factory, callback_list=cb_names
             )
 
             if "sb3_checkpoint" in cb_names:
                 check_idx: int = cb_names.index("sb3_checkpoint")
                 cb_list[check_idx]["save_path"] = self.save_path / "checkpoints"
+                cb_list[check_idx]["save_freq"] = max(
+                    cb_list[check_idx]["save_freq"] // self.n_envs, 1
+                )
 
-            self.service_settings[service_name]["callback"] = CallbackList([
-                self.cb_factory.get_callback(cfg)
-                for cfg in cb_list
-            ])
+            self.service_settings[service_name]["callback"] = CallbackList(
+                [self.cb_factory.get_callback(cfg) for cfg in cb_list]
+            )
+
+    @property
+    def serializable_model_settings(self) -> dict[str, Any]:
+        serializable_settings = deepcopy(self.model_settings)
+        non_serializable = (
+            FloatSchedule,
+            LinearSchedule,
+        )
+        non_serializable_items: list[tuple] = [
+            i
+            for i in serializable_settings.items()
+            if isinstance(i[1], non_serializable)
+        ]
+        for k, v in non_serializable_items:
+            serializable_settings[k] = repr(v)
+
+        return serializable_settings

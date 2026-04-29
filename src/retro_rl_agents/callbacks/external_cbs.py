@@ -19,19 +19,16 @@ _EXTERNAL_CALLBACK_REGISTRY: dict[str, type] = {
     "sb3_event": EventCallback,
     "sb3_stop_on_max_eps": StopTrainingOnMaxEpisodes,
     "sb3_stop_on_no_improve": StopTrainingOnNoModelImprovement,
-    "sb3_stop_on_rew_threshold": StopTrainingOnRewardThreshold
+    "sb3_stop_on_rew_threshold": StopTrainingOnRewardThreshold,
 }
 
+
 def register_external_callbacks(
-    cb_factory: CallbackFactory,
-    callback_list: list[str]
+    cb_factory: CallbackFactory, callback_list: list[str]
 ) -> None:
     for callback in callback_list:
         try:
-            cb_factory.register(
-                callback,
-                _EXTERNAL_CALLBACK_REGISTRY[callback]
-            )
+            cb_factory.register(callback, _EXTERNAL_CALLBACK_REGISTRY[callback])
         except KeyError:
             logger.error("Unexpected callback name: %s", callback.__repr__)
             raise

@@ -1,0 +1,22 @@
+{
+  "model_type": "ppo",
+  "model_path": "trained_agents/ppo/2026-04-28T21:20:22/2000.zip",
+  "results": {
+    "per_episode_returns": [
+      40.096699,
+      16.966223,
+      16.51476
+    ],
+    "average_return": 24.525893999999997,
+    "std_return": 11.01176434458805,
+    "per_episode_lengths": [
+      5961,
+      5961,
+      5961
+    ],
+    "average_length": 5961.0,
+    "std_length": 0.0
+  },
+  "model_settings": {
+    "policy": "CnnPolicy",
+    "learning_rate": 

@@ -13,5 +13,11 @@ class CallbackFactory:
     def get_callback(self, config: dict[str, Any]) -> BaseCallback:
         name: str = config.pop("type")
         if name is None:
+            raise ValueError("'type' field not specified in callback config")
+        try:
+            return self._registry[name](**config)
+        except KeyError:
             raise KeyError(f"Unknown Callback: {name!r}")
-        return self._registry[name](**config)
+        
+    def __repr__(self) -> str:
+        return f"CallbackFactory({list(self._registry.keys())})"

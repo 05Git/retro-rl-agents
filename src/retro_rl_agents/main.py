@@ -5,27 +5,15 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from gymnasium.wrappers import (
-    GrayscaleObservation,
-    NormalizeReward,
-    ResizeObservation,
-)
-from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.utils import set_random_seed
-from stable_baselines3.common.vec_env import (
-    SubprocVecEnv,
-    VecFrameStack,
-    VecTransposeImage,
-)
-from stable_retro import make
 
 from retro_rl_agents.cli.arguments import get_args
-from retro_rl_agents.data_models.config_data import ConfigData
+from retro_rl_agents.domain_models.config_data import ConfigData
+from retro_rl_agents.domain_models.env_model import EnvModel
 from retro_rl_agents.rl_models.load import load_model
 from retro_rl_agents.services.call import call_service
 from retro_rl_agents.utils.constants import (
     DEVICE,
-    GAME_NAME_MAP,
     LOG_DIR,
     VALID_SERVICES,
 )
@@ -55,121 +43,91 @@ def main():
         args.config_path,
     )
 
-    config_path = Path.cwd().resolve() / args.config_path
+    config_path: Path = Path.cwd().resolve() / args.config_path
+    config_data: dict[str, Any] = yaml.full_load(config_path.read_text())
     try:
-        config = load_config(config_path=config_path)
+        env_config: dict[str, Any] = config_data.pop("env_model", {})
+        config: ConfigData = load_config(
+            config_path=config_path, n_envs=args.n_envs, config_cfg=config_data
+        )
+        env_config["seed"] = config.seed
+        if not args.n_envs and env_config["venv_cls"] is not None:
+            logger.warning(
+                "'venv_cls' is set to %s, but no arg was given"
+                " for the number of parallel envs. Setting 'venv_cls'"
+                " to 'None'.",
+                env_config["venv_cls"]
+            )
+            env_config["venv_cls"] = None
+        env_model: EnvModel = make_env_model(
+            env_name=args.game, n_envs=args.n_envs, env_cfg=env_config
+        )
     except Exception as e:
         logger.error(e)
         raise e
-    
+
     using_cuda: bool = (
         "cuda" in DEVICE if isinstance(DEVICE, str) else "cuda" in DEVICE.type
     )
     set_random_seed(config.seed, using_cuda=using_cuda)
 
     try:
-        env = make_vec_env(
-            env_id=lambda: make_env(args.game),
-            n_envs=args.n_envs if args.n_envs is not None else 1,
-            seed=config.seed,
-            vec_env_cls=SubprocVecEnv
-        )
-        env = VecFrameStack(env, n_stack=4)
-        env = VecTransposeImage(env)
-    except FileNotFoundError as e:
-        logger.error(e)
-        raise e
-
-
-    try:
         config.set_callback()
+        env_model.set_wrappers()
         agent = load_model(
             model_type=config.model_type,
-            env=env,
+            env=env_model.env,
             settings_config=config.model_settings,
             model_path=config.model_path,
         )
-        call_service(
-            service_name=args.service,
-            agent=agent,
-            config=config
-        )
+        call_service(service_name=args.service, agent=agent, config=config)
 
     except AttributeError as e:
         logger.error(e)
         raise
 
     finally:
-        env.close()
+        env_model.env.close()
 
 
-def make_env(env_id: str) -> ...:
-    """
-    Make an RL training Env.
-
-    Args:
-        env (str): Name of game to build env with.
-        Game must be implemented in stable_retro.
-
-    Returns:
-        RetroEnv: An RL env of the input game.
-    """
+def make_env_model(
+    env_name: str, n_envs: int | None, env_cfg: dict[str, Any] = {}
+) -> EnvModel:
     try:
-        env = make(env_id)
-    except FileNotFoundError:
-        env = make(GAME_NAME_MAP[env_id])
-    
-    env = GrayscaleObservation(env)
-    env = ResizeObservation(env, (84,84))
-    env = NormalizeReward(env)
-
-    return env
+        return EnvModel(env_name=env_name, n_envs=n_envs, **env_cfg)
+    except ValueError as e:
+        logger.error("Unable to load Env Model: %s", e)
+        raise e
 
 
-def load_config(config_path: Path) -> ConfigData:
-    """
-    Load a YAML config file.
-
-    Args:
-        config_path (Path): Path to config file (must be .yaml or .yml file)
-
-    Raises:
-        FileNotFoundError: on config_path.is_file() returns False
-        ValueError: on config_path.suffix not ".yaml" or ".yml"
-
-    Returns:
-        ConfigData: Config data model
-    """
-    if config_path.suffix not in (".yaml", ".yml"):
-        raise ValueError(
-            "Expected config suffix to be '.yaml' or '.yml', "
-            f"received {config_path.suffix})"
-        )
-
-    try:
-        with open(config_path) as f:
-            data: dict[str, Any] = yaml.safe_load(f)
-    except FileNotFoundError:
-        raise
-
+def load_config(
+    config_path: Path, n_envs: int | None, config_cfg: dict[str, Any] = {}
+) -> ConfigData:
     try:
         individual_service_settings: dict[str, dict[str, Any]] = {
-            k: data.pop(f"{k}_settings")
+            k: config_cfg.pop(serv_settings)
             for k in VALID_SERVICES
-            if f"{k}_settings" in data.keys()
+            if (serv_settings := f"{k}_settings") in config_cfg.keys()
         }
 
-        if "service_settings" in data.keys():
-            data["service_settings"].update(individual_service_settings)
+        if "service_settings" in config_cfg.keys():
+            config_cfg["service_settings"].update(individual_service_settings)
         else:
-            data["service_settings"] = individual_service_settings
+            config_cfg["service_settings"] = individual_service_settings
 
-        return ConfigData(config_path=config_path, **data)
+        if isinstance(n_envs, int) and n_envs <= 0:
+            raise ValueError(
+                "Number of envs must be greater than 0."
+                f" n_envs currently set to: {n_envs}"
+            )
+        config_cfg["n_envs"] = n_envs
+
+        return ConfigData(config_path=config_path, **config_cfg)
 
     except TypeError:
         logger.error(
-            "Config data contained invalid field(s) and/or value(s): %s",
-            str(list(data.items())),
+            "Config config_cfg contained invalid field(s) and/or value(s): %s",
+            str(list(config_cfg.items())),
         )
         raise
 

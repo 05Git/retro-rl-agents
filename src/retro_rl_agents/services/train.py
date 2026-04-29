@@ -3,7 +3,7 @@ from typing import Any
 
 from stable_baselines3.common.base_class import BaseAlgorithm
 
-from retro_rl_agents.data_models.config_data import ConfigData
+from retro_rl_agents.domain_models.config_data import ConfigData
 
 NAME = __name__.split(".")[-1]
 logger = logging.getLogger(NAME)

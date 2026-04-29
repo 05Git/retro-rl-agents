@@ -18,9 +18,7 @@ def get_args() -> Namespace:
     )
 
     parser.add_argument(
-        "game",
-        type=str,
-        help="Name of game to train RL agent on."
+        "game", type=str, help="Name of game to train RL agent on."
     )
 
     parser.add_argument(
@@ -36,7 +34,7 @@ def get_args() -> Namespace:
         "-e",
         type=int,
         required=False,
-        help="Number of parallel envs to run."
+        help="Number of parallel envs to run.",
     )
 
     args = parser.parse_args()

@@ -1,5 +1,16 @@
+env_model:
+  venv_cls: subproc
+  env_wrappers:
+    - type: gym_grayscale
+    - type: gym_resizeobs
+      shape: !!python/tuple
+        - 84
+        - 84
+    - type: gym_framestack
+      stack_size: 4
+    - type: gym_normreward
 model_type: ppo
-model_path: trained_agents/ppo/2026-03-01T10:44:03/2000000.zip
+model_path: trained_agents/ppo/2026-04-28T21:20:22/2000.zip
 model_settings:
   policy: CnnPolicy
   learning_rate:
@@ -25,7 +36,7 @@ model_settings:
   seed: 0
 service_settings:
   train:
-    total_timesteps: 2_000_000
+    total_timesteps: 2_000
     tb_log_name: PPO
     progress_bar: true
   eval:

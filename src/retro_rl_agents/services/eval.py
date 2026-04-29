@@ -6,7 +6,7 @@ import numpy as np
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.evaluation import evaluate_policy
 
-from retro_rl_agents.data_models.config_data import ConfigData
+from retro_rl_agents.domain_models.config_data import ConfigData
 
 NAME = __name__.split(".")[-1]
 logger = logging.getLogger(NAME)
@@ -29,7 +29,12 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     eval_settings: dict[str, Any] = config.get_service_settings(NAME)
     logger.info("Evaluating...")
     try:
-        eval_env = agent.env if agent.env is not None else config.env
+        eval_env = agent.env
+        if eval_env is None:
+            raise ValueError(
+                "Agent's env is set to 'None'."
+                " Must set agent's env before calling the eval service."
+            )
         results = evaluate_policy(model=agent, env=eval_env, **eval_settings)
 
         if eval_settings.get("return_episode_rewards", False):
@@ -38,11 +43,11 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
             logger.info("Per episode lengths: %s", per_ep_lens)
             results_: dict[str, Any] = {
                 "per_episode_returns": per_ep_returns,
-                "average_return": np.mean(per_ep_returns),
-                "std_return": np.std(per_ep_returns),
+                "average_return": np.mean(per_ep_returns).item(),
+                "std_return": np.std(per_ep_returns).item(),
                 "per_episode_lengths": per_ep_lens,
-                "average_length": np.mean(per_ep_lens),
-                "std_length": np.std(per_ep_lens),
+                "average_length": np.mean(per_ep_lens).item(),
+                "std_length": np.std(per_ep_lens).item(),
             }
         else:
             avg_return, std_return = results
@@ -57,7 +62,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
             "model_type": config.model_type,
             "model_path": str(config.model_path),
             "results": results_,
-            "model_settings": config.model_settings,
+            "model_settings": config.serializable_model_settings,
             "eval_settings": eval_settings,
         }
 
@@ -66,7 +71,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
         save_file = save_dir / "eval_results.json"
 
         with open(save_file, mode="wt") as f:
-            json.dump(results_dict, f)
+            json.dump(results_dict, f, indent=2)
 
         logger.info("Eval results saved to %s", save_file)
 
