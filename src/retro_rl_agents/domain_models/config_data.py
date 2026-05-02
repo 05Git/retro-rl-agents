@@ -1,14 +1,18 @@
 from copy import deepcopy
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from datetime import datetime
+from inspect import getmembers
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.utils import FloatSchedule, LinearSchedule
 
 from retro_rl_agents.callbacks.callback_factory import CallbackFactory
 from retro_rl_agents.callbacks.external_cbs import register_external_callbacks
+from retro_rl_agents.domain_models.agent_data import AgentData
+from retro_rl_agents.domain_models.env_data import EnvData
+from retro_rl_agents.domain_models.service_data import ServiceData
 
 
 @dataclass
@@ -33,89 +37,55 @@ class ConfigData:
 
     config_path: Path
 
-    model_type: str
-    model_path: Path | None = None
+    agent_data: AgentData
+    env_data: EnvData
+    service_data: ServiceData
 
     working_dir: Path = Path.cwd().resolve()
     save_dir: str = "trained_agents"
     run_id: str = datetime.now().isoformat(timespec="seconds")
 
-    model_settings: dict[str, Any] = field(default_factory=dict)
     service_settings: dict[str, dict[str, Any]] = field(default_factory=dict)
-
     cb_factory: CallbackFactory = CallbackFactory()
-
     deterministic: bool = True
 
     n_envs: int = 1
+
+    database: Path | None = None
 
     def __post_init__(self) -> None:
         """
         Format data after __init__
         - Change paths from Strings to Paths
         """
-        path_fields = ("config_path", "model_path", "working_dir")
-        for f in fields(self):
-            field_value = getattr(self, f.name)
-            if f.name in path_fields and isinstance(field_value, str):
-                setattr(self, f.name, Path(field_value))
+        cls_members_annotated: dict[str, type] = next(
+            (m for k, m in getmembers(self) if "__annotations__" in k),
+            {}
+        )
+        # Unpack union types to see what the expected args could be
+        unpacked_annotations: dict[str, tuple[type, ...]] = {}
+        for k, v in cls_members_annotated.items():
+            ann_args: tuple[type, ...] = get_args(v)
+            if ann_args:
+                unpacked_annotations[k] = ann_args
+            else:
+                unpacked_annotations[k] = (v,)    
+            
+        path_fields = (k for k, v in unpacked_annotations.items()
+                       if Path in v)
+        for f in path_fields:
+            if isinstance((f_value := getattr(self, f, None)), str):
+                setattr(self, f, Path(f_value))
 
     @property
     def save_path(self) -> Path:
-        return self.working_dir / self.save_dir / self.model_type / self.run_id
-
-    @property
-    def seed(self) -> int:
-        return self.model_settings.get("seed", 0)
-
-    def get_service_settings(self, service_name: str) -> dict[str, Any]:
-        settings = self.service_settings.get(service_name)
-        if settings is None:
-            raise KeyError(f"Service {service_name!r} settings not found.")
-        return settings
+        return (
+            self.working_dir 
+            / self.save_dir
+            / self.agent_data.model_type
+            / self.run_id
+        )
 
     @classmethod
     def generate_timestamp(cls, timespec: str = "seconds") -> str:
         return datetime.now().isoformat(timespec=timespec)
-
-    def set_callback(self) -> None:
-        for service_name in self.service_settings.keys():
-            cb_list: list[dict[str, Any]] | None = self.service_settings[
-                service_name
-            ].get("callback")
-
-            if cb_list is None:
-                continue
-
-            cb_names = [cfg["type"] for cfg in cb_list]
-            register_external_callbacks(
-                cb_factory=self.cb_factory, callback_list=cb_names
-            )
-
-            if "sb3_checkpoint" in cb_names:
-                check_idx: int = cb_names.index("sb3_checkpoint")
-                cb_list[check_idx]["save_path"] = self.save_path / "checkpoints"
-                cb_list[check_idx]["save_freq"] = max(
-                    cb_list[check_idx]["save_freq"] // self.n_envs, 1
-                )
-
-            self.service_settings[service_name]["callback"] = CallbackList(
-                [self.cb_factory.get_callback(cfg) for cfg in cb_list]
-            )
-
-    @property
-    def serializable_model_settings(self) -> dict[str, Any]:
-        serializable_settings = deepcopy(self.model_settings)
-        non_serializable = (
-            FloatSchedule,
-            LinearSchedule,
-        )
-        non_serializable_items: list[tuple] = [
-            i
-            for i in serializable_settings.items()
-            if isinstance(i[1], non_serializable)
-        ]
-        for k, v in non_serializable_items:
-            serializable_settings[k] = repr(v)
-
-        return serializable_settings

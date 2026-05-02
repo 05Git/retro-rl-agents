@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any
 
 from gymnasium import Env
-from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.vec_env import VecEnv
+
+from retro_rl_agents.domain_models.agent_data import AgentData
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ def load_model(
     env: Env | VecEnv,
     settings_config: dict[str, Any],
     model_path: Path | None,
-) -> BaseAlgorithm:
+) -> AgentData:
     """
     Calls the specified module's 'load_model' method.
 
@@ -28,9 +29,10 @@ def load_model(
     Raises:
         ModuleNotFoundError: Invalid module name.
         AttributeError: Specified module has no 'load_model' method.
+        TypeError: Invalid args provided to 'load_model' method.
 
     Returns:
-        BaseAlgorithm: RL model created by specified module.
+        AgentData: Data model representing an RL agent.
     """
     try:
         mod = import_module(f"retro_rl_agents.rl_models.{model_type}")
@@ -49,7 +51,7 @@ def load_model(
         raise AttributeError(" ".join(err_msg_args))
 
     try:
-        return mod.load_model(
+        agent = mod.load_model(
             env=env,
             settings_config=settings_config,
             model_path=model_path,
@@ -60,3 +62,10 @@ def load_model(
             str(list(settings_config.items())),
         )
         raise
+    
+    return AgentData(
+        model_type      = model_type,
+        agent           = agent,
+        model_path      = model_path,
+        model_settings  = settings_config
+    )

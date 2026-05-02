@@ -20,11 +20,10 @@ from retro_rl_agents.utils.constants import GAME_NAME_MAP, VALID_GAMES
 
 
 @dataclass
-class EnvModel:
+class EnvData:
     env_name: str
     n_envs: int | None
     env_wrappers: list[dict[str, Any]] = field(default_factory=list)
-    seed: int = 0
     venv_cls: type[SubprocVecEnv] | type[DummyVecEnv] | None = None
     wrap_factory: EnvWrapperFactory = EnvWrapperFactory()
 
@@ -54,10 +53,9 @@ class EnvModel:
 
     @property
     def env(self) -> retro.RetroEnv | gym.Env | VecEnv:
-        env = self.make_env()
         if self.venv_cls is not None:
-            env = self.vec_env()
-        return env
+            return self.vec_env()
+        return self.make_env()
         
     def make_env(self) -> retro.RetroEnv | gym.Env:
         env = retro.make(self.env_name)
