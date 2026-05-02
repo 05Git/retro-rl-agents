@@ -1,4 +1,5 @@
 import logging
+import sqlite3
 from typing import Any
 
 from stable_baselines3.common.base_class import BaseAlgorithm
@@ -20,10 +21,13 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     """
     train_settings: dict[str, Any] = config.get_service_settings(NAME)
     logger.info("Training...")
+
+    start_time = config.generate_timestamp()
     try:
         agent.learn(**train_settings)
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected, exiting training early.")
+    end_time = config.generate_timestamp()
 
     config.save_path.mkdir(parents=True, exist_ok=True)
 
@@ -40,7 +44,57 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     try:
         agent.save(path=save_path)
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Unable to save model: {e}")
         raise
 
     logger.info(f"Model data saved to {save_path}.zip")
+
+    if config.database is None:
+        return
+    
+    with sqlite3.connect(config.database) as conn:
+        cur = conn.cursor()
+        query = """
+            INSERT INTO training_runs (
+                model_type,
+                model_settings,
+                network_layers,
+                model_path,
+                save_path,
+                env,
+                env_settings,
+                tb_path,
+                total_timesteps,
+                avg_return_final,
+                std_return_final,
+                avg_ep_len_final,
+                std_ep_len_final,
+                started_at,
+                finished_at,
+                sys_settings
+            ) VALUES (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )
+        """
+        q_prams = (
+            config.model_type,
+            config.serializable_model_settings,
+            agent.policy,
+            config.model_path,
+            config.save_path,
+            ...,
+            ..., # Will refactor to use EnvModel rather than agent.env
+            train_settings.get("tensorboard_log", ""),
+            train_settings["total_timesteps"],
+            ...,
+            ...,
+            ...,
+            ..., # Figure out how to extract data from TB
+            start_time,
+            end_time,
+            ...  # Call nvidia-smi through subprocess
+        )
+        cur.execute(query, q_prams)
+        conn.commit()

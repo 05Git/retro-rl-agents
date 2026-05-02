@@ -1234,15 +1234,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pyglet"
-version = "1.5.31"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f7/c0/59130a7edbcc8f84e35870b00a712538ca05415ff02d17181277b8ef8f05/pyglet-1.5.31.zip", hash = "sha256:a5e422b4c27b0fc99e92103bf493109cca5c18143583b868b3b4631a98ae9417", size = 6900712, upload-time = "2024-12-24T07:10:58.022Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e2/43/46aa0ab49f2f5145d201780c7595cf0c305fb4fb5d00d6639792a3d0e770/pyglet-1.5.31-py3-none-any.whl", hash = "sha256:f68413564bbec380e4815898fef0fb7a4a494dc3f8718bfbf28ce2a802634c88", size = 1143660, upload-time = "2024-12-24T07:10:50.769Z" },
-]
-
-[[package]]
 name = "pygments"
 version = "2.20.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1331,7 +1322,6 @@ dependencies = [
     { name = "pyyaml" },
     { name = "setuptools" },
     { name = "stable-baselines3", extra = ["extra"] },
-    { name = "stable-retro" },
     { name = "tensorboard" },
 ]
 
@@ -1349,7 +1339,6 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "setuptools", specifier = "==81.0.0" },
     { name = "stable-baselines3", extras = ["extra"], specifier = ">=2.7.1" },
-    { name = "stable-retro", specifier = ">=0.9.9" },
     { name = "tensorboard", specifier = ">=2.20.0" },
 ]
 
@@ -1645,21 +1634,6 @@ extra = [
     { name = "rich" },
     { name = "tensorboard" },
     { name = "tqdm" },
-]
-
-[[package]]
-name = "stable-retro"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "farama-notifications" },
-    { name = "gymnasium" },
-    { name = "pyglet" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/1b/d2/3ddff38290d9e81dece23ceb1fe09fd07f062ac8e0b66e7da13551a20620/stable_retro-1.0.0.tar.gz", hash = "sha256:96b14eecbf0fd1cd56205c6b83f008a5051c62645725c2a8dc6dd90da8f21925", size = 152913300, upload-time = "2026-04-07T15:45:46.303Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f6/fd/fe7b3a729293fa164f57120f098f292096cf3cde2e494279662fb06e3ca0/stable_retro-1.0.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:1b2209252af5f605b65a5bbedacfb58766427a9736fa43bd819c2e15d30c267a", size = 88125810, upload-time = "2026-04-07T15:45:06.491Z" },
-    { url = "https://files.pythonhosted.org/packages/56/a3/ed819aad0a23c669ce372378e4d5d28fef3d5996de6c3c29db5f776c87d0/stable_retro-1.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:78491631aa09a59396927323888367083fb54c878fa2b1023b2eb3eb30951b1b", size = 123081456, upload-time = "2026-04-07T15:45:13.985Z" },
 ]
 
 [[package]]

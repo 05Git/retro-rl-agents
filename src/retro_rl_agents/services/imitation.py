@@ -24,6 +24,12 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
     imitation_settings: dict[str, Any] = config.get_service_settings(NAME)
     logger.info("Running imitation session...")
 
+    if agent.env is None:
+        raise ValueError(
+            "Agent 'env' property is None. Please set the agent's"
+            " env before calling the imitation service."
+        )
+
     imitation_type: str = imitation_settings.pop("type", "bc")
     imitation_log = imit_logger.configure(
         agent.tensorboard_log,
@@ -37,7 +43,7 @@ def service(agent: BaseAlgorithm, config: ConfigData) -> None:
                 action_space=agent.env.action_space,
                 demonstrations=transitions,
                 rng=np.random.default_rng(seed=agent.seed),
-                policy=agent.policy,
+                policy=agent.policy, # type: ignore
                 device=agent.device,
                 custom_logger=imitation_log,
             )
