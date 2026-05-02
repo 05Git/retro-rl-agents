@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS eval_results (
     avg_ep_len          REAL,
     std_ep_len          REAL,
     full_results        TEXT,              -- store as JSON string
-    started_at          TEXT,   DEFAULT (datetime('now')),
+    started_at          TEXT    DEFAULT (datetime('now')),
     finished_at         TEXT,
     sys_settings        TEXT               -- store as JSON string
 );
