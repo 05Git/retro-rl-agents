@@ -10,7 +10,6 @@ dependencies = [
     "pyyaml>=6.0.3",
     "setuptools==81.0.0",
     "stable-baselines3[extra]>=2.7.1",
-    "stable-retro>=0.9.9",
     "tensorboard>=2.20.0",
 ]
 
@@ -19,6 +18,11 @@ agents = "retro_rl_agents.main:main"
 
 [tool.uv]
 required-version = ">=0.8.17"
+
+[tool.uv.workspace]
+members = [
+    "lib/stable-retro",
+]
 
 [dependency-groups]
 dev = [
