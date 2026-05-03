@@ -8,7 +8,7 @@
             "name": "Python Debugger: Current File with Arguments",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "${cwd}/src/retro_rl_agents/main.py",
             "console": "integratedTerminal",
             "args": "${command:pickArgs}",
             "justMyCode": false

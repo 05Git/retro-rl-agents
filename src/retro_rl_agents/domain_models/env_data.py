@@ -23,6 +23,7 @@ from retro_rl_agents.utils.constants import GAME_NAME_MAP, VALID_GAMES
 class EnvData:
     env_name: str
     n_envs: int | None
+    seed: int = 0
     env_wrappers: list[dict[str, Any]] = field(default_factory=list)
     venv_cls: type[SubprocVecEnv] | type[DummyVecEnv] | None = None
     wrap_factory: EnvWrapperFactory = EnvWrapperFactory()
@@ -54,10 +55,10 @@ class EnvData:
     @property
     def env(self) -> retro.RetroEnv | gym.Env | VecEnv:
         if self.venv_cls is not None:
-            return self.vec_env()
-        return self.make_env()
+            return self._vec_env()
+        return self._make_env()
         
-    def make_env(self) -> retro.RetroEnv | gym.Env:
+    def _make_env(self) -> retro.RetroEnv | gym.Env:
         env = retro.make(self.env_name)
         for cfg in deepcopy(self.env_wrappers):
             wrap_key: str = cfg.pop("type", "")
@@ -65,7 +66,7 @@ class EnvData:
             env = wrapper(env, **cfg)
         return env
 
-    def vec_env(self) -> VecEnv:
+    def _vec_env(self) -> VecEnv:
         if self.venv_cls is None:
             raise ValueError(
                 "VecEnv Class set to 'none', expected 'subproc' or 'dummy'."
@@ -75,7 +76,7 @@ class EnvData:
                 "'n_envs' is None, must set 'n_envs' >= 1 for vecenv."
             )
         return make_vec_env(
-            env_id=lambda: self.make_env(),
+            env_id=lambda: self._make_env(),
             n_envs=self.n_envs,
             seed=self.seed,
             vec_env_cls=self.venv_cls,
@@ -88,3 +89,14 @@ class EnvData:
         register_external_env_wrappers(
             wrap_factory=self.wrap_factory, env_wrappers=wrapper_names
         )
+
+    @property
+    def serializable_env_settings(self) -> dict[str, Any]:
+        serializable_settings: dict[str, Any] = {
+            "seed": self.seed,
+            "n_envs": self.n_envs,
+            "venv_cls": repr(self.venv_cls),
+            "env_wrappers": self.env_wrappers,
+            "wrapper_factory": repr(self.wrap_factory),
+        }
+        return serializable_settings

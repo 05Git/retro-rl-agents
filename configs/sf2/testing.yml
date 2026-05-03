@@ -1,4 +1,8 @@
-env_model:
+database: db/databse.db
+env:
+  env_name: sf2
+  n_envs: 4
+  seed: 0
   venv_cls: subproc
   env_wrappers:
     - type: gym_grayscale
@@ -7,39 +11,43 @@ env_model:
         - 84
         - 84
     - type: gym_framestack
-      stack_size: 4
+      num_stack: 4
     - type: gym_normreward
-model_type: ppo
-model_path: trained_agents/ppo/2026-04-28T21:20:22/2000.zip
-model_settings:
-  policy: CnnPolicy
-  learning_rate:
-    - 2.e-5
-    - 2.5e-6
-  n_steps: 2048
-  batch_size: 64
-  n_epochs: 10
-  gamma: 0.99
-  gae_lambda: 0.95
-  clip_range:
-    - 0.15
-    - 0.025
-  clip_range_vf:
-    - 0.15
-    - 0.025
-  ent_coef: 0
-  vf_coef: 0.5
-  max_grad_norm: 0.5
-  tensorboard_log: tensorboards/sf2
-  verbose: 1
-  stats_window_size: 100
-  seed: 0
-service_settings:
-  train:
-    total_timesteps: 2_000
-    tb_log_name: PPO
-    progress_bar: true
-  eval:
-    n_eval_episodes: 3
-    render: true
-    return_episode_rewards: true
+agent:
+  model_type: ppo
+  model_settings:
+    policy: CnnPolicy
+    learning_rate:
+      - 2.e-5
+      - 2.5e-6
+    n_steps: 2048
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range:
+      - 0.15
+      - 0.025
+    clip_range_vf:
+      - 0.15
+      - 0.025
+    ent_coef: 0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    tensorboard_log: tensorboards/sf2
+    verbose: 1
+    stats_window_size: 100
+    seed: 0
+train:
+  total_timesteps: 5_000
+  tb_log_name: PPO
+  progress_bar: true
+  callback:
+    - type: sb3_checkpoint
+      save_freq: 3_000
+      name_prefix: rl-model
+      verbose: 2
+# eval:
+#   n_eval_episodes: 3
+#   render: true
+#   return_episode_rewards: true

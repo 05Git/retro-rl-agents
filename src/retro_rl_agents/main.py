@@ -37,9 +37,8 @@ def main():
     """Entry point for calling services like 'train' or 'eval'"""
     args = get_args()
     logger.debug(
-        "Service: '%s', Game: '%s', Config Path: '%s'",
+        "Service: '%s', Config Path: '%s'",
         args.service,
-        args.game,
         args.config_path,
     )
 
@@ -47,15 +46,17 @@ def main():
     config_settings: dict[str, Any] = yaml.full_load(config_path.read_text())
     try:
         env_data = EnvData(**config_settings.pop("env", {}))
+        env_data.set_wrappers()
         service_data = ServiceData(
-            **config_settings.pop("service_settings", {})
+            service_name=args.service,
+            settings=config_settings.pop(args.service, {})
         )
         agent_config: dict[str, Any] = config_settings.pop("agent", {})
         agent_data = load_model(
             env                 = env_data.env,
             model_type          = agent_config.pop("model_type"),
-            model_path          = agent_config.pop("model_path"),
-            settings_config     = agent_config,
+            model_path          = agent_config.pop("model_path", None),
+            settings_config     = agent_config.pop("model_settings", {}),
         )
         config_data = ConfigData(
             config_path         = config_path,
@@ -64,6 +65,10 @@ def main():
             service_data        = service_data,
             **config_settings
         )
+        config_data.service_data.set_callback(
+            save_path   = config_data.save_path,
+            n_envs      = config_data.env_data.n_envs
+        )
     except Exception as e:
         logger.error(e)
         raise e
@@ -71,17 +76,13 @@ def main():
     using_cuda: bool = (
         "cuda" in DEVICE if isinstance(DEVICE, str) else "cuda" in DEVICE.type
     )
-    set_random_seed(config.seed, using_cuda=using_cuda)
+    set_random_seed(config_data.env_data.seed, using_cuda=using_cuda)
 
     try:
-        service_data.set_callback()
-        env_data.set_wrappers()
-        call_service(service_name=args.service, agent=agent, config=config)
-
-    except AttributeError as e:
+        call_service(service_name=args.service, config=config_data)
+    except Exception as e:
         logger.error(e)
         raise
-
     finally:
         env_data.env.close()
 

@@ -4,12 +4,10 @@ Wrappers from external libs like Gymnasium
 
 import logging
 
-from gymnasium.wrappers import (
-    GrayscaleObservation,
-    ResizeObservation,
-    FrameStackObservation,
-    NormalizeReward,
-)
+from gymnasium.wrappers.frame_stack import FrameStack
+from gymnasium.wrappers.gray_scale_observation import GrayScaleObservation
+from gymnasium.wrappers.normalize import NormalizeReward
+from gymnasium.wrappers.resize_observation import ResizeObservation
 
 from retro_rl_agents.env_wrappers.wrapper_factory import EnvWrapperFactory
 
@@ -17,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 _EXTERNAL_WRAPPER_REGISTRY = {
-    "gym_grayscale": GrayscaleObservation,
+    "gym_grayscale": GrayScaleObservation,
     "gym_resizeobs": ResizeObservation,
-    "gym_framestack": FrameStackObservation,
+    "gym_framestack": FrameStack,
     "gym_normreward": NormalizeReward,
 }
 

@@ -1,4 +1,8 @@
-env_model:
+database: db/databse.db
+env:
+  env_name: sf2
+  n_envs: 4
+  seed: 0
   venv_cls: subproc
   env_wrappers:
     - type: gym_grayscale
@@ -7,33 +11,34 @@ env_model:
         - 84
         - 84
     - type: gym_framestack
-      stack_size: 4
+      num_stack: 4
     - type: gym_normreward
-model_type: ppo
-model_settings:
-  policy: CnnPolicy
-  learning_rate:
-    - 2.e-5
-    - 2.5e-6
-  n_steps: 2048
-  batch_size: 64
-  n_epochs: 10
-  gamma: 0.99
-  gae_lambda: 0.95
-  clip_range:
-    - 0.15
-    - 0.025
-  clip_range_vf:
-    - 0.15
-    - 0.025
-  ent_coef: 0
-  vf_coef: 0.5
-  max_grad_norm: 0.5
-  tensorboard_log: tensorboards/sf2
-  verbose: 1
-  stats_window_size: 100
-  seed: 0
-train_settings:
+agent:
+  model_type: ppo
+  model_settings:
+    policy: CnnPolicy
+    learning_rate:
+      - 2.e-5
+      - 2.5e-6
+    n_steps: 2048
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range:
+      - 0.15
+      - 0.025
+    clip_range_vf:
+      - 0.15
+      - 0.025
+    ent_coef: 0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    tensorboard_log: tensorboards/sf2
+    verbose: 1
+    stats_window_size: 100
+    seed: 0
+train:
   total_timesteps: 50_000_000
   tb_log_name: PPO
   progress_bar: true

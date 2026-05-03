@@ -1,15 +1,11 @@
-from copy import deepcopy
-from dataclasses import dataclass, field
+import subprocess
+from dataclasses import dataclass
 from datetime import datetime
 from inspect import getmembers
 from pathlib import Path
-from typing import Any, get_args
+from typing import get_args
+from warnings import warn
 
-from stable_baselines3.common.callbacks import CallbackList
-from stable_baselines3.common.utils import FloatSchedule, LinearSchedule
-
-from retro_rl_agents.callbacks.callback_factory import CallbackFactory
-from retro_rl_agents.callbacks.external_cbs import register_external_callbacks
 from retro_rl_agents.domain_models.agent_data import AgentData
 from retro_rl_agents.domain_models.env_data import EnvData
 from retro_rl_agents.domain_models.service_data import ServiceData
@@ -22,17 +18,9 @@ class ConfigData:
 
     Attributes:
         config_path (Path): Path to actual yaml config.
-        model_type (str): The type of RL model used.
-        model_path (Path | None): Optional path to pre-trained model.
         working_dir (Path): Path to directory where script is running from.
         save_dir (str): Optional directory name for saving RL models to.
         run_id (str): Optional ID for a specific run.
-        model_settings (dict[str, Any]): RL model parameters.
-        train_settings (dict[str, Any]): Training parameters.
-
-    NOTE: This is starting to expand beyond its original scope. Consider
-    narrowing down the data and creating a new RunManager class once init
-    dev work finishes.
     """
 
     config_path: Path
@@ -45,11 +33,7 @@ class ConfigData:
     save_dir: str = "trained_agents"
     run_id: str = datetime.now().isoformat(timespec="seconds")
 
-    service_settings: dict[str, dict[str, Any]] = field(default_factory=dict)
-    cb_factory: CallbackFactory = CallbackFactory()
     deterministic: bool = True
-
-    n_envs: int = 1
 
     database: Path | None = None
 
@@ -89,3 +73,40 @@ class ConfigData:
     @classmethod
     def generate_timestamp(cls, timespec: str = "seconds") -> str:
         return datetime.now().isoformat(timespec=timespec)
+
+    @classmethod
+    def get_sys_info(cls) -> str:
+        """
+        Return the CPU and GPU info of the system.
+        """
+        try:
+            res = subprocess.run(
+                ["nvidia-smi",
+                 "--query-gpu=name,memory.total,driver_version",
+                 "--format=csv,noheader"],
+                 capture_output=True,
+                 text=True
+            )
+        except FileNotFoundError:
+            warn_msg = "'nvidia-smi' not found, cannot print sys info."
+            warn(warn_msg)
+            return warn_msg
+        
+        retcode = res.returncode
+        if retcode == 0:
+            sys_info: list[dict[str, str]] = []
+            for line in res.stdout.strip().split("\n"):
+                d = {}
+                keys = ("GPU", "VRAM", "Driver")
+                line = line.strip().split(",")[:len(keys)]
+                for key, item in zip(keys, line):
+                    d[key] = item
+                sys_info.append(d)
+            return str(sys_info)
+        else:
+            warn_msg = (
+                "Cannot print sys info:"
+                f" 'nvidia-smi' return code: {retcode}."
+            )
+            warn(warn_msg)
+            return warn_msg

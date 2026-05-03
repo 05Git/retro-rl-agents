@@ -17,7 +17,6 @@ class ServiceData:
     service_name: str
     settings: dict[str, Any] = field(default_factory=dict)
     cb_factory: CallbackFactory = CallbackFactory()
-    deterministic: bool = True
 
     def set_callback(self, **kwargs) -> None:
         cb_list: list[dict[str, Any]] | None = self.settings.get("callback")
