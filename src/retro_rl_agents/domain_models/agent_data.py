@@ -18,7 +18,7 @@ class AgentData:
     """
 
     model_type: str
-    agent: BaseAlgorithm | Any # Abstract into protocols later
+    agent: BaseAlgorithm | Any  # Abstract into protocols later
     model_path: Path | None = None
     model_settings: dict[str, Any] = field(default_factory=dict)
 
@@ -28,8 +28,7 @@ class AgentData:
         - Change paths from Strings to Paths
         """
         cls_members_annotated: dict[str, type] = next(
-            (m for k, m in getmembers(self) if "__annotations__" in k),
-            {}
+            (m for k, m in getmembers(self) if "__annotations__" in k), {}
         )
         # Unpack union types to see what the expected args should be
         unpacked_annotations: dict[str, tuple[type, ...]] = {}
@@ -38,14 +37,13 @@ class AgentData:
             if ann_args:
                 unpacked_annotations[k] = ann_args
             else:
-                unpacked_annotations[k] = (v,)    
-            
-        path_fields = (k for k, v in unpacked_annotations.items()
-                       if Path in v)
+                unpacked_annotations[k] = (v,)
+
+        path_fields = (k for k, v in unpacked_annotations.items() if Path in v)
         for f in path_fields:
             if isinstance((f_value := getattr(self, f, None)), str):
                 setattr(self, f, Path(f_value))
-    
+
     @property
     def serializable_model_settings(self) -> dict[str, Any]:
         serializable_settings = deepcopy(self.model_settings)

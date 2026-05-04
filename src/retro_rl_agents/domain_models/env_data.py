@@ -57,7 +57,7 @@ class EnvData:
         if self.venv_cls is not None:
             return self._vec_env()
         return self._make_env()
-        
+
     def _make_env(self) -> retro.RetroEnv | gym.Env:
         env = retro.make(self.env_name)
         for cfg in deepcopy(self.env_wrappers):

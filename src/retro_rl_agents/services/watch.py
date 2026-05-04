@@ -12,13 +12,13 @@ def service(config: ConfigData) -> None:
     """
     env = config.env_data.env
     agent = config.agent_data.agent
-    
+
     obs = env.reset()
     if isinstance(obs, tuple) and len(obs) == 2:
         obs, _ = obs
 
     while True:
-        action, _ = agent.predict(obs, deterministic=config.deterministic) # type: ignore
+        action, _ = agent.predict(obs, deterministic=config.deterministic)  # type: ignore
         result = env.step(action)
 
         if len(result) == 4:

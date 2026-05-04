@@ -45,7 +45,7 @@ class ServiceData:
                 cb_list[check_idx]["save_freq"] = max(
                     cb_list[check_idx]["save_freq"] // n_envs, 1
                 )
-    
+
         self.settings["callback"] = CallbackList(
             [self.cb_factory.get_callback(cfg) for cfg in cb_list]
         )

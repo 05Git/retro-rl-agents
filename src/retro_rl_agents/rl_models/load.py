@@ -62,10 +62,10 @@ def load_model(
             str(list(settings_config.items())),
         )
         raise
-    
+
     return AgentData(
-        model_type      = model_type,
-        agent           = agent,
-        model_path      = model_path,
-        model_settings  = settings_config
+        model_type=model_type,
+        agent=agent,
+        model_path=model_path,
+        model_settings=settings_config,
     )

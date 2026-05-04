@@ -21,7 +21,7 @@ def service(config: ConfigData) -> None:
     start_time = config.generate_timestamp()
     try:
         train_methods = (
-            "learn",    # Stable-Baselines3 train method
+            "learn",  # Stable-Baselines3 train method
         )
         for method in train_methods:
             if hasattr(agent, method):
@@ -60,7 +60,7 @@ def service(config: ConfigData) -> None:
 
     if config.database is None:
         return
-    
+
     with sqlite3.connect(config.database.resolve()) as conn:
         logger.info("Connecting to %s.", config.database.resolve())
         cur = conn.cursor()
@@ -103,7 +103,7 @@ def service(config: ConfigData) -> None:
             start_time,
             end_time,
             config.config_path.read_text(),
-            config.get_sys_info()
+            config.get_sys_info(),
         )
         cur.execute(query, q_prams)
         conn.commit()

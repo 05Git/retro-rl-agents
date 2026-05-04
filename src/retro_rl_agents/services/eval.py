@@ -33,7 +33,7 @@ def service(config: ConfigData) -> None:
         results = evaluate_policy(
             model=config.agent_data.agent,
             env=config.env_data.env,
-            **eval_settings
+            **eval_settings,
         )
 
         if eval_settings.get("return_episode_rewards", False):
@@ -78,7 +78,7 @@ def service(config: ConfigData) -> None:
 
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected, exiting evaluation early.")
-    
+
     end_time = config.generate_timestamp()
 
     if (
@@ -87,7 +87,7 @@ def service(config: ConfigData) -> None:
         or "results_dict" not in locals()
     ):
         return
-    
+
     with sqlite3.connect(config.database.resolve()) as conn:
         logger.info("Connecting to %s.", config.database.resolve())
         cur = conn.cursor()
@@ -121,15 +121,15 @@ def service(config: ConfigData) -> None:
             str(config.agent_data.model_path),
             config.env_data.env_name,
             json.dumps(config.env_data.serializable_env_settings),
-            results_.get("average_return", None),    # type: ignore
-            results_.get("std_return", None),        # type: ignore
-            results_.get("average_length", None),    # type: ignore
-            results_.get("std_length", None),        # type: ignore
-            results_dict,   # type: ignore
+            results_.get("average_return", None),  # type: ignore
+            results_.get("std_return", None),  # type: ignore
+            results_.get("average_length", None),  # type: ignore
+            results_.get("std_length", None),  # type: ignore
+            results_dict,  # type: ignore
             start_time,
             end_time,
             config.config_path.read_text(),
-            config.get_sys_info()
+            config.get_sys_info(),
         )
         cur.execute(query, q_prams)
         conn.commit()

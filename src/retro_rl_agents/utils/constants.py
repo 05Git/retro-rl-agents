@@ -14,17 +14,17 @@ VALID_GAMES: list[str] = list(GAME_NAME_MAP.keys()) + list(
     GAME_NAME_MAP.values()
 )
 
-serv_mods = next(Path(services.__path__[0]).walk(), (None, None, []))[2]
+_serv_mods = next(Path(services.__path__[0]).walk(), (None, None, []))[2]
 VALID_SERVICES: list[str] = [
     service_type.replace(".py", "")
-    for service_type in serv_mods
+    for service_type in _serv_mods
     if service_type != "call.py" and service_type.endswith(".py")
 ]
 
-rlm_mods = next(Path(rl_models.__path__[0]).walk(), (None, None, []))[2]
+_rlm_mods = next(Path(rl_models.__path__[0]).walk(), (None, None, []))[2]
 VALID_MODELS: list[str] = [
     model_type.replace(".py", "")
-    for model_type in rlm_mods
+    for model_type in _rlm_mods
     if model_type != "load.py" and model_type.endswith(".py")
 ]
 

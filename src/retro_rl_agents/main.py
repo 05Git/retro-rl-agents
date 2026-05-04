@@ -49,25 +49,24 @@ def main():
         env_data.set_wrappers()
         service_data = ServiceData(
             service_name=args.service,
-            settings=config_settings.pop(args.service, {})
+            settings=config_settings.pop(args.service, {}),
         )
         agent_config: dict[str, Any] = config_settings.pop("agent", {})
         agent_data = load_model(
-            env                 = env_data.env,
-            model_type          = agent_config.pop("model_type"),
-            model_path          = agent_config.pop("model_path", None),
-            settings_config     = agent_config.pop("model_settings", {}),
+            env=env_data.env,
+            model_type=agent_config.pop("model_type"),
+            model_path=agent_config.pop("model_path", None),
+            settings_config=agent_config.pop("model_settings", {}),
         )
         config_data = ConfigData(
-            config_path         = config_path,
-            agent_data          = agent_data,
-            env_data            = env_data,
-            service_data        = service_data,
-            **config_settings
+            config_path=config_path,
+            agent_data=agent_data,
+            env_data=env_data,
+            service_data=service_data,
+            **config_settings,
         )
         config_data.service_data.set_callback(
-            save_path   = config_data.save_path,
-            n_envs      = config_data.env_data.n_envs
+            save_path=config_data.save_path, n_envs=config_data.env_data.n_envs
         )
     except Exception as e:
         logger.error(e)

@@ -18,6 +18,6 @@ class CallbackFactory:
             return self._registry[name](**config)
         except KeyError:
             raise KeyError(f"Unknown Callback: {name!r}")
-        
+
     def __repr__(self) -> str:
         return f"CallbackFactory({list(self._registry.keys())})"
