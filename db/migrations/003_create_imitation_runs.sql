@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS imitation_runs (
     imitation_settings  TEXT,              -- store as YAML string
     avg_loss_final      REAL,
     avg_ep_len_final    REAL,
-    started_at          TEXT    DEFAULT (datetime('now')),
+    started_at          TEXT,
     finished_at         TEXT,
     config_settings     TEXT,              -- store as YAML string
     sys_settings        TEXT

@@ -1,3 +1,4 @@
+import json
 import logging
 import sqlite3
 from typing import Any
@@ -86,17 +87,15 @@ def service(config: ConfigData) -> None:
                 ?, ?, ?, ?, ?
             )
         """
-        avg_return_final, avg_ep_len_final = (
-            config.agent_data.get_tb_log_final_step_res()
-        )
+        avg_return_final, avg_ep_len_final = config.get_tb_log_final_step_res()
         q_prams = (
             config.agent_data.model_type,
-            config.agent_data.serializable_model_settings,
+            json.dumps(config.agent_data.serializable_model_settings),
             repr(agent.policy),
-            config.agent_data.model_path,
-            config.save_path,
+            str(config.agent_data.model_path),
+            str(config.save_path),
             config.env_data.env_name,
-            config.env_data.serializable_env_settings,
+            json.dumps(config.env_data.serializable_env_settings),
             train_settings.get("tensorboard_log", ""),
             train_settings["total_timesteps"],
             avg_return_final,

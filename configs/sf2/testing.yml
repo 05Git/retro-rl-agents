@@ -1,7 +1,7 @@
-database: db/databse.db
+database: db/testing_database.db
 env:
   env_name: sf2
-  n_envs: 4
+  n_envs: 3
   seed: 0
   venv_cls: subproc
   env_wrappers:
@@ -34,19 +34,19 @@ agent:
     ent_coef: 0
     vf_coef: 0.5
     max_grad_norm: 0.5
-    tensorboard_log: tensorboards/sf2
+    tensorboard_log: tensorboards/sf2_testing
     verbose: 1
     stats_window_size: 100
     seed: 0
 train:
-  total_timesteps: 5_000
+  total_timesteps: 50_000
   tb_log_name: PPO
   progress_bar: true
-  callback:
-    - type: sb3_checkpoint
-      save_freq: 3_000
-      name_prefix: rl-model
-      verbose: 2
+  # callback:
+  #   - type: sb3_checkpoint
+  #     save_freq: 25_000
+  #     name_prefix: rl-model
+  #     verbose: 2
 # eval:
 #   n_eval_episodes: 3
 #   render: true

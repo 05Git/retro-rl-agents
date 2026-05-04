@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS training_runs (
     total_timesteps     INTEGER NOT NULL,
     avg_return_final    REAL,
     avg_ep_len_final    REAL,
-    started_at          TEXT    DEFAULT (datetime('now')),
+    started_at          TEXT,
     finished_at         TEXT,
     config_settings     TEXT,              -- store as YAML string
     sys_settings        TEXT

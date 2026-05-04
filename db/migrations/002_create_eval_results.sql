@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS eval_results (
     avg_ep_len          REAL,
     std_ep_len          REAL,
     full_results        TEXT,              -- store as YAML string
-    started_at          TEXT    DEFAULT (datetime('now')),
+    started_at          TEXT,
     finished_at         TEXT,
     config_settings     TEXT,              -- store as YAML string
     sys_settings        TEXT

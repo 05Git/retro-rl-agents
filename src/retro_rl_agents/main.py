@@ -76,7 +76,7 @@ def main():
     using_cuda: bool = (
         "cuda" in DEVICE if isinstance(DEVICE, str) else "cuda" in DEVICE.type
     )
-    set_random_seed(config_data.env_data.seed, using_cuda=using_cuda)
+    set_random_seed(config_data.seed, using_cuda=using_cuda)
 
     try:
         call_service(service_name=args.service, config=config_data)
