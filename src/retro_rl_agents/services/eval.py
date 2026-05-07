@@ -25,14 +25,15 @@ def service(config: ConfigData) -> None:
             "Cannot eval an agent without a pre-trained model, "
             "please set 'model_path' variable before calling this service."
         )
-
+    assert config.agent_data.agent.env is not None
+    
     logger.info("Evaluating...")
     eval_settings = config.service_data.settings
     start_time = config.generate_timestamp()
     try:
         results = evaluate_policy(
             model=config.agent_data.agent,
-            env=config.env_data.env,
+            env=config.agent_data.agent.env,
             **eval_settings,
         )
 
@@ -92,27 +93,27 @@ def service(config: ConfigData) -> None:
         logger.info("Connecting to %s.", config.database.resolve())
         cur = conn.cursor()
         query = """
-            INSERT INTO eval_results (
-                model_type,
-                model_settings,
-                model_policy,
-                model_path,
-                env,
-                env_settings,
-                avg_return,
-                std_return,
-                avg_ep_len,
-                std_ep_len,
-                full_results,
-                started_at,
-                finished_at,
-                config_settings,
-                sys_settings
-            ) VALUES (
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?
-            )
+        INSERT INTO eval_results (
+            model_type,
+            model_settings,
+            model_policy,
+            model_path,
+            env,
+            env_settings,
+            avg_return,
+            std_return,
+            avg_ep_len,
+            std_ep_len,
+            full_results,
+            started_at,
+            finished_at,
+            config_settings,
+            sys_settings
+        ) VALUES (
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?
+        )
         """
         q_prams = (
             config.agent_data.model_type,

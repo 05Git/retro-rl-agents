@@ -58,6 +58,9 @@ def main():
             model_path=agent_config.pop("model_path", None),
             settings_config=agent_config.pop("model_settings", {}),
         )
+        if agent_data.agent.env is None:
+            env_data.env.close()
+            raise ValueError("Agent 'env' variable not set, exiting.")
         config_data = ConfigData(
             config_path=config_path,
             agent_data=agent_data,
@@ -81,7 +84,7 @@ def main():
         call_service(service_name=args.service, config=config_data)
     except Exception as e:
         logger.error(e)
-        raise
+        raise e
     finally:
         agent_data.agent.env.close()
 

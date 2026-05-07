@@ -24,7 +24,7 @@ logger = logging.getLogger(NAME)
 def service(config: ConfigData) -> None:
     imitation_settings: dict[str, Any] = config.service_data.settings
     agent = config.agent_data.agent
-    env = config.env_data.env
+    assert agent.env is not None
 
     logger.info("Running imitation session...")
 
@@ -36,8 +36,8 @@ def service(config: ConfigData) -> None:
     match imitation_type:
         case "bc":
             imitation_trainer = bc.BC(
-                observation_space=env.observation_space,
-                action_space=env.action_space,
+                observation_space=agent.env.observation_space,
+                action_space=agent.env.action_space,
                 demonstrations=transitions,
                 rng=np.random.default_rng(seed=agent.seed),
                 policy=agent.policy,  # type: ignore
@@ -47,8 +47,8 @@ def service(config: ConfigData) -> None:
             model_name = str(imitation_settings["n_epochs"])
         case "gail":
             reward_net = CnnRewardNet(
-                observation_space=env.observation_space,
-                action_space=env.action_space,
+                observation_space=agent.env.observation_space,
+                action_space=agent.env.action_space,
                 hwc_format=False,
                 use_action=False,
                 use_next_state=True,
@@ -58,7 +58,7 @@ def service(config: ConfigData) -> None:
                 demo_batch_size=512,
                 gen_replay_buffer_capacity=256,
                 n_disc_updates_per_round=8,
-                venv=env,  # type: ignore
+                venv=agent.env,  # type: ignore
                 gen_algo=agent,
                 reward_net=reward_net,
                 custom_logger=imitation_log,
@@ -104,27 +104,27 @@ def service(config: ConfigData) -> None:
         logger.info("Connecting to %s.", config.database.resolve())
         cur = conn.cursor()
         query = """
-            INSERT INTO imitation_runs (
-                model_type,
-                model_settings,
-                model_policy,
-                model_path,
-                save_path,
-                env,
-                env_settings,
-                tb_path,
-                imitation_type,
-                avg_loss_final,
-                avg_ep_len_final,
-                started_at,
-                finished_at,
-                config_settings,
-                sys_settings
-            ) VALUES (
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?
-            )
+        INSERT INTO imitation_runs (
+            model_type,
+            model_settings,
+            model_policy,
+            model_path,
+            save_path,
+            env,
+            env_settings,
+            tb_path,
+            imitation_type,
+            avg_loss_final,
+            avg_ep_len_final,
+            started_at,
+            finished_at,
+            config_settings,
+            sys_settings
+        ) VALUES (
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?
+        )
         """
         # TODO: Refactor after testing + debugging to return relevant rollout stats
         avg_return_final, avg_ep_len_final = config.get_tb_log_final_step_res()

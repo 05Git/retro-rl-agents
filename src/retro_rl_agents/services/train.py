@@ -16,6 +16,7 @@ def service(config: ConfigData) -> None:
     """
     train_settings: dict[str, Any] = config.service_data.settings
     agent = config.agent_data.agent
+    assert agent.env is not None
     logger.info("Training...")
 
     start_time = config.generate_timestamp()
@@ -33,8 +34,13 @@ def service(config: ConfigData) -> None:
                 " Please make sure the agent implements one of these methods:"
                 f" {train_methods}. Agent type: {type(agent).__name__}"
             )
+        
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected, exiting training early.")
+        
+    finally:
+        agent.env.close()
+
     end_time = config.generate_timestamp()
 
     config.save_path.mkdir(parents=True, exist_ok=True)
@@ -65,27 +71,27 @@ def service(config: ConfigData) -> None:
         logger.info("Connecting to %s.", config.database.resolve())
         cur = conn.cursor()
         query = """
-            INSERT INTO training_runs (
-                model_type,
-                model_settings,
-                model_policy,
-                model_path,
-                save_path,
-                env,
-                env_settings,
-                tb_path,
-                total_timesteps,
-                avg_return_final,
-                avg_ep_len_final,
-                started_at,
-                finished_at,
-                config_settings,
-                sys_settings
-            ) VALUES (
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?
-            )
+        INSERT INTO training_runs (
+            model_type,
+            model_settings,
+            model_policy,
+            model_path,
+            save_path,
+            env,
+            env_settings,
+            tb_path,
+            total_timesteps,
+            avg_return_final,
+            avg_ep_len_final,
+            started_at,
+            finished_at,
+            config_settings,
+            sys_settings
+        ) VALUES (
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?
+        )
         """
         avg_return_final, avg_ep_len_final = config.get_tb_log_final_step_res()
         q_prams = (

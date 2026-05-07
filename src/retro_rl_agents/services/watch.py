@@ -12,17 +12,15 @@ def service(config: ConfigData) -> None:
     Observe an agent's behaviour by watching it play the dang game.
     """
     agent = config.agent_data.agent
-    env = agent.env
-    if env is None:
-        raise ValueError()
+    assert agent.env is not None
 
-    obs = env.reset()
+    obs = agent.env.reset()
     if isinstance(obs, tuple) and len(obs) == 2:
         obs, _ = obs
 
     while True:
         action, _ = agent.predict(obs, deterministic=config.deterministic)  # type: ignore
-        result = env.step(action)
+        result = agent.env.step(action)
 
         if len(result) == 4:
             obs, rew, term, info = result
@@ -32,7 +30,7 @@ def service(config: ConfigData) -> None:
             obs, rew, term, trunc, info = result
             done = term or trunc
 
-        env.render()
+        agent.env.render()
         if done:
             break
         time.sleep(0.01)

@@ -2,7 +2,6 @@
 Environment model which wraps the given training env
 """
 
-from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -26,7 +25,8 @@ class EnvData:
     seed: int = 0
     env_wrappers: list[dict[str, Any]] = field(default_factory=list)
     venv_cls: type[SubprocVecEnv] | type[DummyVecEnv] | None = None
-    wrap_factory: EnvWrapperFactory = EnvWrapperFactory()
+    wrap_factory: EnvWrapperFactory = field(default_factory=EnvWrapperFactory)
+    _env: retro.RetroEnv | gym.Env | VecEnv | None = None
 
     def __post_init__(self) -> None:
         if self.env_name not in VALID_GAMES:
@@ -54,14 +54,24 @@ class EnvData:
 
     @property
     def env(self) -> retro.RetroEnv | gym.Env | VecEnv:
-        if self.venv_cls is not None:
-            return self._vec_env()
-        return self._make_env()
+        if self._env is None:
+            return (
+                self._vec_env()
+                if self.venv_cls is not None
+                else self._make_env()
+            )
+        return self._env
+
+    @env.setter
+    def env(self) -> None:
+        raise AttributeError(
+            "Cannot set 'env' attribute."
+        )
 
     def _make_env(self) -> retro.RetroEnv | gym.Env:
         env = retro.make(self.env_name)
-        for cfg in deepcopy(self.env_wrappers):
-            wrap_key: str = cfg.pop("type", "")
+        for cfg in (c.copy() for c in self.env_wrappers):
+            wrap_key: str = cfg.pop("type")
             wrapper = self.wrap_factory.get_wrapper(wrap_key)
             env = wrapper(env, **cfg)
         return env
