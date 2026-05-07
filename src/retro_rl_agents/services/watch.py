@@ -1,4 +1,5 @@
 import logging
+import time
 
 from retro_rl_agents.domain_models.config_data import ConfigData
 
@@ -10,8 +11,10 @@ def service(config: ConfigData) -> None:
     """
     Observe an agent's behaviour by watching it play the dang game.
     """
-    env = config.env_data.env
     agent = config.agent_data.agent
+    env = agent.env
+    if env is None:
+        raise ValueError()
 
     obs = env.reset()
     if isinstance(obs, tuple) and len(obs) == 2:
@@ -32,3 +35,4 @@ def service(config: ConfigData) -> None:
         env.render()
         if done:
             break
+        time.sleep(0.01)

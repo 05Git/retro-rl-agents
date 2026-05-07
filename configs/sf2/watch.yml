@@ -1,0 +1,20 @@
+database: db/database.db
+env:
+  env_name: sf2
+  n_envs: 1
+  seed: 0
+  env_wrappers:
+    - type: gym_grayscale
+    - type: gym_resizeobs
+      shape: !!python/tuple
+        - 84
+        - 84
+    - type: gym_framestack
+      num_stack: 4
+    - type: gym_normreward
+agent:
+  model_type: ppo
+  model_path: trained_agents/ppo/2026-05-04T10:21:02/200000000.zip
+  model_settings:
+    policy: CnnPolicy
+    seed: 0

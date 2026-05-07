@@ -83,7 +83,7 @@ def main():
         logger.error(e)
         raise
     finally:
-        env_data.env.close()
+        agent_data.agent.env.close()
 
 
 if __name__ == "__main__":
